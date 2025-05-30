@@ -13,6 +13,8 @@ class LSTransferTreeBoost():
         self.alpha_0 = alpha_0
         self.decay_factor = decay_factor
         self.min_samples_leaf = min_samples_leaf
+        self.initial_guess = None
+        self.x_train_target_snapshot = None #to use in predict
 
         # Initialize containers to be set during fit
         self.model_tray_clf = []
@@ -21,9 +23,9 @@ class LSTransferTreeBoost():
         self.leaf_gammashats_tray = []
         self.alpha_tray = []
 
-    def predict(self, x_test, x_train_target, y_train_target):
+    def predict(self, x_test):
         F_pred = np.full_like(
-            x_test[:, 0], np.mean(y_train_target))  # Initialize with training mean
+            x_test[:, 0], self.initial_guess)  # Initialize with training mean
 
         # Iterate over each model (clf, clfhat) in the model tray
         for i, clf in enumerate(self.model_tray_clf):
@@ -32,8 +34,8 @@ class LSTransferTreeBoost():
             v = self.v
 
             # Get leaf indices for train and test
-            leaves_clf_train = clf.apply(x_train_target)
-            leaves_clfhat_train = clfhat.apply(x_train_target)
+            leaves_clf_train = clf.apply(self.x_train_target_snapshot)
+            leaves_clfhat_train = clfhat.apply(self.x_train_target_snapshot)
             leaves_clf_test = clf.apply(x_test)
             leaves_clfhat_test = clfhat.apply(x_test)
 
@@ -62,10 +64,21 @@ class LSTransferTreeBoost():
                 F_pred[indexed_leaves_clfhat_test == index] += v * leaf_gammahat[index] * alpha
 
         return F_pred
+    
+    def evaluate(self, x_test, y_test, metric = 'rmse'):
+        preds = self.predict(x_test)
+        if metric == 'rmse':
+            return compute_rmse(preds, y_test)
+        if metric == 'mse':
+            return compute_mse(preds, y_test)
+        else:
+            raise ValueError(f"Unsupported metric: {metric}")
 
     def fit(self, x_train_target, y_train_target, x_train_source, y_train_source, train_curve=False):
+        self.x_train_target_snapshot = x_train_target
         all_X = np.concatenate((x_train_target, x_train_source))
-        F = np.full(all_X.shape[0], np.mean(y_train_target))
+        self.initial_guess = np.mean(y_train_target)
+        F = np.full(all_X.shape[0], self.initial_guess)
 
         alpha = self.alpha_0
         self.model_tray_clf = []
