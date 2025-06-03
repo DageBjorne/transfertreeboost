@@ -1,4 +1,5 @@
 import numpy as np
+import scipy
 
 #leaves returned by sklearn are not incremental by one. 
 # They can be for instance 1,3,4,7. This mapping should return (in this case) 0,1,2,3
@@ -22,6 +23,10 @@ def compute_rmse(predictions, targets):
 def compute_mse(predictions, targets):
     """Compute Root Mean Squared Error (RMSE)."""
     return np.mean((predictions - targets)**2)
+
+def compute_mae(predictions, targets):
+    """Compute Root Mean Squared Error (RMSE)."""
+    return np.mean(np.abs(predictions - targets))
 
 def find_gamma_gammahat(unique_leaves_clf, indexed_leaves_clf, 
                         unique_leaves_clfhat, indexed_leaves_clfhat,
@@ -58,4 +63,57 @@ def find_gamma_gammahat(unique_leaves_clf, indexed_leaves_clf,
     leaf_gamma = gamma_vector[:len(unique_leaves_clf)]
     leaf_gammahat = gamma_vector[len(unique_leaves_clf):]
     return leaf_gamma, leaf_gammahat
+
+#In here will be the function for computing optimal coefficients for LAD
+def find_gamma_gammahat_LAD(unique_leaves_clf, indexed_leaves_clf, 
+                             unique_leaves_clfhat, indexed_leaves_clfhat,
+                             y_train_target_residuals):
+
+    # Objective: minimize sum of absolute residuals
+    c1 = np.ones((1, len(indexed_leaves_clf)))  
+    c2 = np.zeros((1, len(unique_leaves_clf) + len(unique_leaves_clfhat)))
+    c = np.concatenate((c1, c2), axis=1).flatten()
+
+    # Constraint matrix
+    A1 = np.eye(len(indexed_leaves_clf))
+    A2 = np.zeros((len(indexed_leaves_clf), len(unique_leaves_clf) + len(unique_leaves_clfhat)))
+
+    for i, index in enumerate(indexed_leaves_clf):
+        A2[i, index] = 1
+    for i, index in enumerate(indexed_leaves_clfhat):
+        A2[i, index + len(unique_leaves_clf)] = 1
+
+    A = -np.concatenate((A1, A2), axis=1)
+
+
+    # Constraint bounds
+    b_ub = -y_train_target_residuals.copy()
+
+    # Constraint matrix 2
+    Ag = np.concatenate((-A1, A2), axis = 1)
+
+    # Constraint bounds 2
+    b_ub_g = y_train_target_residuals.copy()
+
+
+    #Combine two one constraint matrix
+    A = np.vstack((A, Ag))
+    b_ub = np.concatenate((b_ub, b_ub_g))
+
+
+    # Solve LP
+    result = scipy.optimize.linprog(c, A_ub=A, b_ub=b_ub, bounds=(None, None), method='highs')
+
+    if not result.success:
+        raise ValueError(f"Optimization failed: {result.message}")
+
+    all_optimal_params = result.x
+
+    gamma_vector = all_optimal_params[len(indexed_leaves_clf):]
+    leaf_gamma = gamma_vector[:len(unique_leaves_clf)]
+    leaf_gammahat = gamma_vector[len(unique_leaves_clf):]
+
+    return leaf_gamma, leaf_gammahat
+
+
 
