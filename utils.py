@@ -28,6 +28,15 @@ def compute_mae(predictions, targets):
     """Compute Root Mean Squared Error (RMSE)."""
     return np.mean(np.abs(predictions - targets))
 
+def early_stopping(es_rounds, val_loss_list, tol = 1e-6):
+    recent_min = np.min(val_loss_list[-es_rounds:])
+    global_min = np.min(val_loss_list)
+
+    if recent_min > global_min + tol:
+        return True  # No improvement recently → stop
+    else:
+        return False  # Still improving → continue
+
 def find_gamma_gammahat(unique_leaves_clf, indexed_leaves_clf, 
                         unique_leaves_clfhat, indexed_leaves_clfhat,
                         y_train_target_residuals):
