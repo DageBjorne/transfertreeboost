@@ -2,3 +2,4 @@ env
 __pycache__
 requirements_dev.txt
 tester.ipynb
+model.joblib
