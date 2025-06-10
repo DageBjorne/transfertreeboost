@@ -20,7 +20,6 @@ pip install -r requirements.txt
 A simple example follows below:
 
 ```
-from utils import *
 from core import LSTransferTreeBoost
 #instantiate model
 model = LSTransferTreeBoost()
