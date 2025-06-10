@@ -329,3 +329,169 @@ class LADTransferTreeBoost():
             plt.show()
 
         return self.leaf_gammas_tray, self.leaf_gammashats_tray, self.model_tray_clf, self.model_tray_clfhat, self.alpha_tray
+
+#Huber Loss, should stay the same
+class MTransferTreeBoost():
+    def __init__(self, v=0.1, epochs=100, target_tree_size=2, source_tree_size=2,
+                 alpha_0=1.0, decay_factor=0.99, min_samples_leaf=25):
+        self.v = v
+        self.epochs = epochs
+        self.target_tree_size = target_tree_size
+        self.source_tree_size = source_tree_size
+        self.alpha_0 = alpha_0
+        self.decay_factor = decay_factor
+        self.min_samples_leaf = min_samples_leaf
+        self.initial_guess = None
+
+        self.model_tray_clf = []
+        self.model_tray_clfhat = []
+        self.leaf_gammas_tray = []
+        self.leaf_gammashats_tray = []
+        self.alpha_tray = []
+
+        # NEW: store leaf index mappings
+        self.leaf_index_map_clf = []
+        self.leaf_index_map_clfhat = []
+
+    def predict(self, x_test):
+        F_pred = np.full_like(x_test[:, 0], self.initial_guess)
+
+        for i, clf in enumerate(self.model_tray_clf):
+            clfhat = self.model_tray_clfhat[i]
+            alpha = self.alpha_tray[i]
+            v = self.v
+
+            leaves_clf_test = clf.apply(x_test)
+            leaves_clfhat_test = clfhat.apply(x_test)
+
+            # Use precomputed mappings
+            leaf_map_clf = self.leaf_index_map_clf[i]
+            leaf_map_clfhat = self.leaf_index_map_clfhat[i]
+
+            indexed_leaves_clf_test = np.array([leaf_map_clf.get(l, -1) for l in leaves_clf_test])
+            indexed_leaves_clfhat_test = np.array([leaf_map_clfhat.get(l, -1) for l in leaves_clfhat_test])
+
+            leaf_gamma = self.leaf_gammas_tray[i]
+            leaf_gammahat = self.leaf_gammashats_tray[i]
+
+            for index in np.unique(indexed_leaves_clf_test):
+                if index == -1: continue
+                F_pred[indexed_leaves_clf_test == index] += v * leaf_gamma[index] * (1 - alpha)
+
+            for index in np.unique(indexed_leaves_clfhat_test):
+                if index == -1: continue
+                F_pred[indexed_leaves_clfhat_test == index] += v * leaf_gammahat[index] * alpha
+
+        return F_pred
+
+    def evaluate(self, x_test, y_test, metric='rmse'):
+        preds = self.predict(x_test)
+        if metric == 'rmse':
+            return compute_rmse(preds, y_test)
+        if metric == 'mse':
+            return compute_mse(preds, y_test)
+        if metric == 'mae':
+            return compute_mae(preds, y_test)
+        else:
+            raise ValueError(f"Unsupported metric: {metric}")
+
+    def fit(self, x_train_target, y_train_target, x_train_source, y_train_source,
+            show_curves=False, val_x=None, val_y=None, early_stopping_rounds=5):
+        all_X = np.concatenate((x_train_target, x_train_source))
+        self.initial_guess = np.median(y_train_target)
+        F = np.full(all_X.shape[0], self.initial_guess)
+
+        alpha = self.alpha_0
+        self.model_tray_clf = []
+        self.model_tray_clfhat = []
+        self.leaf_gammas_tray = []
+        self.leaf_gammashats_tray = []
+        self.alpha_tray = []
+        self.leaf_index_map_clf = []
+        self.leaf_index_map_clfhat = []
+
+        if show_curves:
+            losses = []
+        if val_x is not None and val_y is not None:
+            val_losses = []
+
+        target_indices = np.arange(len(y_train_target))
+        source_indices = np.arange(len(y_train_target), len(y_train_target) + len(y_train_source))
+
+        for m in range(self.epochs):
+            y_train_target_residuals = y_train_target - F[target_indices]
+            y_train_source_residuals = y_train_source - F[source_indices]
+
+            clf = DecisionTreeRegressor(max_depth=self.target_tree_size, min_samples_leaf=self.min_samples_leaf)
+            clf.fit(x_train_target, y_train_target_residuals)
+
+            clfhat = DecisionTreeRegressor(max_depth=self.source_tree_size, min_samples_leaf=self.min_samples_leaf)
+            clfhat.fit(x_train_source, y_train_source_residuals)
+
+            self.model_tray_clf.append(clf)
+            self.model_tray_clfhat.append(clfhat)
+
+            leaves_clf_target = clf.apply(x_train_target)
+            leaves_clfhat_target = clfhat.apply(x_train_target)
+            leaves_clf_source = clf.apply(x_train_source)
+            leaves_clfhat_source = clfhat.apply(x_train_source)
+
+            # Combine and normalize leaves
+            all_leaves_clf = np.concatenate([leaves_clf_target, leaves_clf_source])
+            all_leaves_clfhat = np.concatenate([leaves_clfhat_target, leaves_clfhat_source])
+
+            indexed_leaves_clf = map_leaves_to_number(all_leaves_clf)[:len(leaves_clf_target)]
+            indexed_leaves_clfhat = map_leaves_to_number(all_leaves_clfhat)[:len(leaves_clfhat_target)]
+
+            leaf_gamma, leaf_gammahat = find_gamma_gammahat_Huber(
+                np.unique(all_leaves_clf), indexed_leaves_clf,
+                np.unique(all_leaves_clfhat), indexed_leaves_clfhat,
+                y_train_target_residuals)
+
+            self.leaf_gammas_tray.append(leaf_gamma)
+            self.leaf_gammashats_tray.append(leaf_gammahat)
+
+            alpha *= self.decay_factor
+            self.alpha_tray.append(alpha)
+
+            # Build leaf → index mappings and store
+            def build_leaf_index_mapping(*leaf_arrays):
+                leaves = np.concatenate(leaf_arrays)
+                unique = np.unique(leaves)
+                return {leaf: idx for idx, leaf in enumerate(unique)}
+
+            self.leaf_index_map_clf.append(build_leaf_index_mapping(leaves_clf_target, leaves_clf_source))
+            self.leaf_index_map_clfhat.append(build_leaf_index_mapping(leaves_clfhat_target, leaves_clfhat_source))
+
+            indexed_all_clf = map_leaves_to_number(all_leaves_clf)
+            indexed_all_clfhat = map_leaves_to_number(all_leaves_clfhat)
+
+            for index in np.unique(indexed_all_clf):
+                F[indexed_all_clf == index] += self.v * leaf_gamma[index] * (1 - alpha)
+            for index in np.unique(indexed_all_clfhat):
+                F[indexed_all_clfhat == index] += self.v * leaf_gammahat[index] * alpha
+
+            if show_curves:
+                losses.append(compute_mae(F[target_indices], y_train_target))
+
+            if val_x is not None and val_y is not None:
+                val_lad = self.evaluate(val_x, val_y, metric = 'mae')
+                val_losses.append(val_lad)
+                es = early_stopping(early_stopping_rounds, val_losses, tol = 1e-6)
+                
+                if es:
+                    break
+
+        if show_curves:
+            x = np.linspace(1, m+1, m+1)
+            plt.plot(x, np.array(losses))
+            if val_x is not None and val_y is not None:
+                plt.plot(x, np.array(val_losses))
+                plt.legend(['train_loss', 'val_loss'])
+
+            plt.title('Loss over epochs')
+            plt.xlabel('epoch')
+            plt.ylabel('MAE')
+            plt.show()
+
+        return self.leaf_gammas_tray, self.leaf_gammashats_tray, self.model_tray_clf, self.model_tray_clfhat, self.alpha_tray

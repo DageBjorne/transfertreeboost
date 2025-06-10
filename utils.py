@@ -126,3 +126,71 @@ def find_gamma_gammahat_LAD(unique_leaves_clf, indexed_leaves_clf,
 
 
 
+import numpy as np
+
+def huber_weights(residuals, delta):
+    """
+    Compute weights for IRLS under Huber loss.
+
+    Parameters:
+    - residuals: array of residuals
+    - delta: Huber threshold
+
+    Returns:
+    - weights: array of weights
+    """
+    abs_res = np.abs(residuals)
+    weights = np.ones_like(residuals)
+    mask = abs_res > delta
+    weights[mask] = delta / abs_res[mask]
+    return weights
+
+
+#Huber Loss (written by GPT, needs improvement)
+def find_gamma_gammahat_Huber(unique_leaves_clf, indexed_leaves_clf, 
+                              unique_leaves_clfhat, indexed_leaves_clfhat,
+                              y_train_target_residuals, 
+                              delta=1.0, max_iter=10, tol=1e-6):
+
+    J = len(unique_leaves_clf)
+    K = len(unique_leaves_clfhat)
+    N = len(y_train_target_residuals)
+
+    # Build design matrix X: rows = data points, columns = J+K coefficients
+    X = np.zeros((N, J+K))
+    for i in range(N):
+        X[i, indexed_leaves_clf[i]] = 1
+        X[i, J + indexed_leaves_clfhat[i]] = 1
+
+    # Initialize coefficients
+    gamma_vector = np.zeros(J + K)
+
+    # Initial residuals (without gamma offsets)
+    residuals = y_train_target_residuals.copy()
+
+    for iteration in range(max_iter):
+        weights = huber_weights(residuals, delta)
+        
+        # Weighted least squares solution
+        W = np.diag(weights)
+        # Solve (X^T W X) gamma = X^T W y
+        XTWX = X.T @ W @ X
+        XTWy = X.T @ W @ y_train_target_residuals
+
+        # Use least squares solver in case XTWX is singular
+        gamma_new = np.linalg.lstsq(XTWX, XTWy, rcond=None)[0]
+
+        # Update residuals
+        residuals_new = y_train_target_residuals - X @ gamma_new
+
+        # Check convergence
+        if np.linalg.norm(gamma_new - gamma_vector) < tol:
+            break
+        
+        gamma_vector = gamma_new
+        residuals = residuals_new
+
+    leaf_gamma = gamma_vector[:J]
+    leaf_gammahat = gamma_vector[J:]
+
+    return leaf_gamma, leaf_gammahat
