@@ -1,5 +1,6 @@
 import numpy as np
 import scipy
+import cvxpy as cp
 
 #leaves returned by sklearn are not incremental by one. 
 # They can be for instance 1,3,4,7. This mapping should return (in this case) 0,1,2,3
@@ -27,6 +28,14 @@ def compute_mse(predictions, targets):
 def compute_mae(predictions, targets):
     """Compute Root Mean Squared Error (RMSE)."""
     return np.mean(np.abs(predictions - targets))
+
+def compute_huber(predictions, targets, delta):
+    residuals = np.abs(predictions - targets)
+    lad_mask = residuals > delta   # True where residual > delta (outliers)
+    mse_part = compute_mse(predictions[~lad_mask], targets[~lad_mask])
+    lad_part = compute_mae(predictions[lad_mask], targets[lad_mask])
+    return mse_part + lad_part
+
 
 def early_stopping(es_rounds, val_loss_list, tol = 1e-6):
     recent_min = np.min(val_loss_list[-es_rounds:])
@@ -125,72 +134,69 @@ def find_gamma_gammahat_LAD(unique_leaves_clf, indexed_leaves_clf,
     return leaf_gamma, leaf_gammahat
 
 
+def find_lad_ls_indices_delta(y_train_target_residuals, quantile = 0.9):
+    delta = np.quantile(np.abs(y_train_target_residuals), q = quantile)
+    lad_indices = np.where(np.abs(y_train_target_residuals) > delta)[0]
+    ls_indices = np.where(np.abs(y_train_target_residuals) <= delta)[0]
 
-import numpy as np
 
-def huber_weights(residuals, delta):
-    """
-    Compute weights for IRLS under Huber loss.
-
-    Parameters:
-    - residuals: array of residuals
-    - delta: Huber threshold
-
-    Returns:
-    - weights: array of weights
-    """
-    abs_res = np.abs(residuals)
-    weights = np.ones_like(residuals)
-    mask = abs_res > delta
-    weights[mask] = delta / abs_res[mask]
-    return weights
+    return lad_indices, ls_indices, delta
 
 
 #Huber Loss (written by GPT, needs improvement)
 def find_gamma_gammahat_Huber(unique_leaves_clf, indexed_leaves_clf, 
                               unique_leaves_clfhat, indexed_leaves_clfhat,
-                              y_train_target_residuals, 
-                              delta=1.0, max_iter=10, tol=1e-6):
+                              y_train_target_residuals, lad_indices, ls_indices, delta):
+    
 
-    J = len(unique_leaves_clf)
-    K = len(unique_leaves_clfhat)
-    N = len(y_train_target_residuals)
+    total_variable_len = len(unique_leaves_clf) + len(unique_leaves_clfhat) + len(indexed_leaves_clf)
+    Q = np.eye(total_variable_len) #construct this matrix for the quadratic part
+    Q[lad_indices] = 0
+    c1 = np.zeros((1, len(indexed_leaves_clf)))  
+    c2 = np.zeros((1, len(unique_leaves_clf) + len(unique_leaves_clfhat)))
+    c = np.concatenate((c1, c2), axis=1).flatten()
+    c[lad_indices] = 1*delta
 
-    # Build design matrix X: rows = data points, columns = J+K coefficients
-    X = np.zeros((N, J+K))
-    for i in range(N):
-        X[i, indexed_leaves_clf[i]] = 1
-        X[i, J + indexed_leaves_clfhat[i]] = 1
+    # Constraint matrix
+    A1 = np.eye(len(indexed_leaves_clf))
+    A2 = np.zeros((len(indexed_leaves_clf), len(unique_leaves_clf) + len(unique_leaves_clfhat)))
 
-    # Initialize coefficients
-    gamma_vector = np.zeros(J + K)
+    for i, index in enumerate(indexed_leaves_clf):
+        A2[i, index] = 1
+    for i, index in enumerate(indexed_leaves_clfhat):
+        A2[i, index + len(unique_leaves_clf)] = 1
+    A = -np.concatenate((A1, A2), axis=1)
+    A[ls_indices,:] = 0
 
-    # Initial residuals (without gamma offsets)
-    residuals = y_train_target_residuals.copy()
 
-    for iteration in range(max_iter):
-        weights = huber_weights(residuals, delta)
-        
-        # Weighted least squares solution
-        W = np.diag(weights)
-        # Solve (X^T W X) gamma = X^T W y
-        XTWX = X.T @ W @ X
-        XTWy = X.T @ W @ y_train_target_residuals
+    # Constraint bounds
+    b_ub = -y_train_target_residuals.copy()
+    b_ub[ls_indices] = 0
 
-        # Use least squares solver in case XTWX is singular
-        gamma_new = np.linalg.lstsq(XTWX, XTWy, rcond=None)[0]
+    # Constraint matrix 2
+    Ag = np.concatenate((-A1, A2), axis = 1)
+    Ag[ls_indices,:] = 0
 
-        # Update residuals
-        residuals_new = y_train_target_residuals - X @ gamma_new
+    # Constraint bounds 2
+    b_ub_g = y_train_target_residuals.copy()
+    b_ub_g[ls_indices] = 0
 
-        # Check convergence
-        if np.linalg.norm(gamma_new - gamma_vector) < tol:
-            break
-        
-        gamma_vector = gamma_new
-        residuals = residuals_new
 
-    leaf_gamma = gamma_vector[:J]
-    leaf_gammahat = gamma_vector[J:]
+    #Combine two one constraint matrix
+    A = np.vstack((A, Ag))
+    b_ub = np.concatenate((b_ub, b_ub_g))
+
+
+    n_vars = total_variable_len
+    x = cp.Variable(n_vars) 
+    objective = cp.Minimize(0.5 * cp.quad_form(x, Q) + c.T @ x)
+    constraints = [A @ x <= b_ub]
+
+    prob = cp.Problem(objective, constraints)
+    prob.solve()
+    
+    gamma_vector = x.value[len(indexed_leaves_clf):]
+    leaf_gamma = gamma_vector[:len(unique_leaves_clf)]
+    leaf_gammahat = gamma_vector[len(unique_leaves_clf):]
 
     return leaf_gamma, leaf_gammahat

@@ -443,10 +443,11 @@ class MTransferTreeBoost():
             indexed_leaves_clf = map_leaves_to_number(all_leaves_clf)[:len(leaves_clf_target)]
             indexed_leaves_clfhat = map_leaves_to_number(all_leaves_clfhat)[:len(leaves_clfhat_target)]
 
-            leaf_gamma, leaf_gammahat = find_gamma_gammahat_Huber(
-                np.unique(all_leaves_clf), indexed_leaves_clf,
+            lad_indices, ls_indices, delta = find_lad_ls_indices_delta(y_train_target_residuals)
+            leaf_gamma, leaf_gammahat = find_gamma_gammahat_Huber(np.unique(all_leaves_clf), indexed_leaves_clf,
                 np.unique(all_leaves_clfhat), indexed_leaves_clfhat,
-                y_train_target_residuals)
+                y_train_target_residuals,
+                lad_indices, ls_indices, delta)
 
             self.leaf_gammas_tray.append(leaf_gamma)
             self.leaf_gammashats_tray.append(leaf_gammahat)
@@ -472,10 +473,11 @@ class MTransferTreeBoost():
                 F[indexed_all_clfhat == index] += self.v * leaf_gammahat[index] * alpha
 
             if show_curves:
-                losses.append(compute_mae(F[target_indices], y_train_target))
+                losses.append(compute_huber(F[target_indices], y_train_target, delta))
 
             if val_x is not None and val_y is not None:
-                val_lad = self.evaluate(val_x, val_y, metric = 'mae')
+                val_preds = self.predict(val_x)
+                val_lad = compute_huber(val_preds, val_y, delta)
                 val_losses.append(val_lad)
                 es = early_stopping(early_stopping_rounds, val_losses, tol = 1e-6)
                 
@@ -491,7 +493,7 @@ class MTransferTreeBoost():
 
             plt.title('Loss over epochs')
             plt.xlabel('epoch')
-            plt.ylabel('MAE')
+            plt.ylabel('Huber loss')
             plt.show()
 
         return self.leaf_gammas_tray, self.leaf_gammashats_tray, self.model_tray_clf, self.model_tray_clfhat, self.alpha_tray
