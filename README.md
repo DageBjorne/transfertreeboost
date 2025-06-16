@@ -2,7 +2,7 @@
 
 This repository is used for employing ```TransferTreeBoost```, a method for transfer learning based on Gradient Tree Boosting. 
 
-Currently, two methods are available: ```L2TransferTreeBoost``` (least squares loss) and ```LADTransferTreeBoost``` (least absolute deviation loss).
+Currently, three methods are available: ```L2TransferTreeBoost``` (least squares loss), ```LADTransferTreeBoost``` (least absolute deviation loss) , `MTransferTreeBoost` (Huber loss)
 
 To test it, create a virtual environment and install the requirements.
 
