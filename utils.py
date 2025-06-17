@@ -134,7 +134,7 @@ def find_gamma_gammahat_LAD(unique_leaves_clf, indexed_leaves_clf,
     return leaf_gamma, leaf_gammahat
 
 
-def find_lad_ls_indices_delta(y_train_target_residuals, quantile = 0.95):
+def find_lad_ls_indices_delta(y_train_target_residuals, quantile):
     delta = np.quantile(np.abs(y_train_target_residuals), q = quantile)
     lad_indices = np.where(np.abs(y_train_target_residuals) > delta)[0]
     ls_indices = np.where(np.abs(y_train_target_residuals) <= delta)[0]

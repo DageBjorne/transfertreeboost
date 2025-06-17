@@ -333,7 +333,7 @@ class LADTransferTreeBoost():
 #Huber Loss, should stay the same
 class MTransferTreeBoost():
     def __init__(self, v=0.1, epochs=100, target_tree_size=2, source_tree_size=2,
-                 alpha_0=1.0, decay_factor=0.99, min_samples_leaf=25):
+                 alpha_0=1.0, decay_factor=0.99, min_samples_leaf=25, quantile = 0.9):
         self.v = v
         self.epochs = epochs
         self.target_tree_size = target_tree_size
@@ -341,6 +341,7 @@ class MTransferTreeBoost():
         self.alpha_0 = alpha_0
         self.decay_factor = decay_factor
         self.min_samples_leaf = min_samples_leaf
+        self.quantile = quantile
         self.initial_guess = None
 
         self.model_tray_clf = []
@@ -443,7 +444,7 @@ class MTransferTreeBoost():
             indexed_leaves_clf = map_leaves_to_number(all_leaves_clf)[:len(leaves_clf_target)]
             indexed_leaves_clfhat = map_leaves_to_number(all_leaves_clfhat)[:len(leaves_clfhat_target)]
 
-            lad_indices, ls_indices, delta = find_lad_ls_indices_delta(y_train_target_residuals)
+            lad_indices, ls_indices, delta = find_lad_ls_indices_delta(y_train_target_residuals, self.quantile)
             leaf_gamma, leaf_gammahat = find_gamma_gammahat_Huber(np.unique(all_leaves_clf), indexed_leaves_clf,
                 np.unique(all_leaves_clfhat), indexed_leaves_clfhat,
                 y_train_target_residuals,
