@@ -33,7 +33,7 @@ def compute_huber(predictions, targets, delta):
     residuals = np.abs(predictions - targets)
     lad_mask = residuals > delta   # True where residual > delta (outliers)
     mse_part = compute_mse(predictions[~lad_mask], targets[~lad_mask])
-    lad_part = compute_mae(predictions[lad_mask], targets[lad_mask])
+    lad_part = compute_mae(predictions[lad_mask], targets[lad_mask])*delta - delta**2 / 2
     return mse_part + lad_part
 
 
@@ -134,7 +134,7 @@ def find_gamma_gammahat_LAD(unique_leaves_clf, indexed_leaves_clf,
     return leaf_gamma, leaf_gammahat
 
 
-def find_lad_ls_indices_delta(y_train_target_residuals, quantile = 0.9):
+def find_lad_ls_indices_delta(y_train_target_residuals, quantile = 0.95):
     delta = np.quantile(np.abs(y_train_target_residuals), q = quantile)
     lad_indices = np.where(np.abs(y_train_target_residuals) > delta)[0]
     ls_indices = np.where(np.abs(y_train_target_residuals) <= delta)[0]
