@@ -1,0 +1,5 @@
+,seed,disturbance_level,rmse,mae,source_tree_size,target_tree_size,v,tau,epochs,method
+0,1,1,2.1350804696364145,1.6779854559062048,2,2,0.05,0.97,400,LSTransferTreeBoost
+1,1,1,2.0871201396574803,1.7370674066964922,2,2,0.05,0.97,400,LADTransferTreeBoost
+2,1,1,1.7525445955482115,1.3877335993700746,2,2,0.05,0.97,400,MTransferTreeBoost
+3,1,2,1.9933065039646518,1.5929715574686547,2,2,0.05,0.97,400,LSTransferTreeBoost
