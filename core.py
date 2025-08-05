@@ -4,13 +4,12 @@ from utils import *
 
 class LSTransferTreeBoost():
     def __init__(self, v=0.1, epochs=100, target_tree_size=2, source_tree_size=2,
-                 alpha_0=1.0, decay_factor=0.99, min_samples_leaf=25):
+                 alpha=0.7, min_samples_leaf=25):
         self.v = v
         self.epochs = epochs
         self.target_tree_size = target_tree_size
         self.source_tree_size = source_tree_size
-        self.alpha_0 = alpha_0
-        self.decay_factor = decay_factor
+        self.alpha = alpha
         self.min_samples_leaf = min_samples_leaf
         self.initial_guess = None
 
@@ -72,7 +71,7 @@ class LSTransferTreeBoost():
         self.initial_guess = np.mean(y_train_target)
         F = np.full(all_X.shape[0], self.initial_guess)
 
-        alpha = self.alpha_0
+        alpha = self.alpha
         self.model_tray_clf = []
         self.model_tray_clfhat = []
         self.leaf_gammas_tray = []
@@ -121,8 +120,6 @@ class LSTransferTreeBoost():
 
             self.leaf_gammas_tray.append(leaf_gamma)
             self.leaf_gammashats_tray.append(leaf_gammahat)
-
-            alpha *= self.decay_factor
             self.alpha_tray.append(alpha)
 
             # Build leaf → index mappings and store
@@ -167,13 +164,12 @@ class LSTransferTreeBoost():
 
 class LADTransferTreeBoost():
     def __init__(self, v=0.1, epochs=100, target_tree_size=2, source_tree_size=2,
-                 alpha_0=1.0, decay_factor=0.99, min_samples_leaf=25, optimizer_package = 'scipy'):
+                 alpha = 0.7, min_samples_leaf=25, optimizer_package = 'scipy'):
         self.v = v
         self.epochs = epochs
         self.target_tree_size = target_tree_size
         self.source_tree_size = source_tree_size
-        self.alpha_0 = alpha_0
-        self.decay_factor = decay_factor
+        self.alpha = alpha
         self.min_samples_leaf = min_samples_leaf
         self.initial_guess = None
         self.optimizer_package = optimizer_package
@@ -236,7 +232,7 @@ class LADTransferTreeBoost():
         self.initial_guess = np.median(y_train_target)
         F = np.full(all_X.shape[0], self.initial_guess)
 
-        alpha = self.alpha_0
+        alpha = self.alpha
         self.model_tray_clf = []
         self.model_tray_clfhat = []
         self.leaf_gammas_tray = []
@@ -293,7 +289,6 @@ class LADTransferTreeBoost():
             self.leaf_gammas_tray.append(leaf_gamma)
             self.leaf_gammashats_tray.append(leaf_gammahat)
 
-            alpha *= self.decay_factor
             self.alpha_tray.append(alpha)
 
             # Build leaf → index mappings and store
@@ -341,13 +336,12 @@ class LADTransferTreeBoost():
 #Huber Loss, should stay the same
 class MTransferTreeBoost():
     def __init__(self, v=0.1, epochs=100, target_tree_size=2, source_tree_size=2,
-                 alpha_0=1.0, decay_factor=0.99, min_samples_leaf=25, quantile = 0.9):
+                 alpha=0.7, min_samples_leaf=25, quantile = 0.9):
         self.v = v
         self.epochs = epochs
         self.target_tree_size = target_tree_size
         self.source_tree_size = source_tree_size
-        self.alpha_0 = alpha_0
-        self.decay_factor = decay_factor
+        self.alpha = alpha
         self.min_samples_leaf = min_samples_leaf
         self.quantile = quantile
         self.initial_guess = None
@@ -410,7 +404,7 @@ class MTransferTreeBoost():
         self.initial_guess = np.median(y_train_target)
         F = np.full(all_X.shape[0], self.initial_guess)
 
-        alpha = self.alpha_0
+        alpha = self.alpha
         self.model_tray_clf = []
         self.model_tray_clfhat = []
         self.leaf_gammas_tray = []
@@ -461,7 +455,6 @@ class MTransferTreeBoost():
             self.leaf_gammas_tray.append(leaf_gamma)
             self.leaf_gammashats_tray.append(leaf_gammahat)
 
-            alpha *= self.decay_factor
             self.alpha_tray.append(alpha)
 
             # Build leaf → index mappings and store
