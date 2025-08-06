@@ -4,14 +4,15 @@ from utils import *
 
 class LSTransferTreeBoost():
     def __init__(self, v=0.1, epochs=100, target_tree_size=2, source_tree_size=2,
-                 alpha=0.7, min_samples_leaf=25):
+                 alpha_0=1.0, decay_factor=0.99, min_samples_leaf=25):
         self.v = v
         self.epochs = epochs
         self.target_tree_size = target_tree_size
         self.source_tree_size = source_tree_size
-        self.alpha = alpha
+        self.alpha_0 = alpha_0
         self.min_samples_leaf = min_samples_leaf
         self.initial_guess = None
+        self.decay_factor = decay_factor
 
         self.model_tray_clf = []
         self.model_tray_clfhat = []
@@ -71,7 +72,7 @@ class LSTransferTreeBoost():
         self.initial_guess = np.mean(y_train_target)
         F = np.full(all_X.shape[0], self.initial_guess)
 
-        alpha = self.alpha
+        alpha = self.alpha_0
         self.model_tray_clf = []
         self.model_tray_clfhat = []
         self.leaf_gammas_tray = []
@@ -121,6 +122,7 @@ class LSTransferTreeBoost():
             self.leaf_gammas_tray.append(leaf_gamma)
             self.leaf_gammashats_tray.append(leaf_gammahat)
             self.alpha_tray.append(alpha)
+            alpha *= self.decay_factor
 
             # Build leaf → index mappings and store
             def build_leaf_index_mapping(*leaf_arrays):
@@ -139,6 +141,9 @@ class LSTransferTreeBoost():
             for index in np.unique(indexed_all_clfhat):
                 F[indexed_all_clfhat == index] += self.v * leaf_gammahat[index] * alpha
 
+
+
+            
             if show_curves:
                 losses.append(compute_mse(F[target_indices], y_train_target))
 
@@ -164,12 +169,13 @@ class LSTransferTreeBoost():
 
 class LADTransferTreeBoost():
     def __init__(self, v=0.1, epochs=100, target_tree_size=2, source_tree_size=2,
-                 alpha = 0.7, min_samples_leaf=25, optimizer_package = 'scipy'):
+                 alpha_0=1.0, decay_factor=0.99, min_samples_leaf=25, optimizer_package = 'scipy'):
         self.v = v
         self.epochs = epochs
         self.target_tree_size = target_tree_size
         self.source_tree_size = source_tree_size
-        self.alpha = alpha
+        self.alpha_0 = alpha_0
+        self.decay_factor = decay_factor
         self.min_samples_leaf = min_samples_leaf
         self.initial_guess = None
         self.optimizer_package = optimizer_package
@@ -232,7 +238,7 @@ class LADTransferTreeBoost():
         self.initial_guess = np.median(y_train_target)
         F = np.full(all_X.shape[0], self.initial_guess)
 
-        alpha = self.alpha
+        alpha = self.alpha_0
         self.model_tray_clf = []
         self.model_tray_clfhat = []
         self.leaf_gammas_tray = []
@@ -290,6 +296,7 @@ class LADTransferTreeBoost():
             self.leaf_gammashats_tray.append(leaf_gammahat)
 
             self.alpha_tray.append(alpha)
+            alpha *= self.decay_factor
 
             # Build leaf → index mappings and store
             def build_leaf_index_mapping(*leaf_arrays):
@@ -336,12 +343,13 @@ class LADTransferTreeBoost():
 #Huber Loss, should stay the same
 class MTransferTreeBoost():
     def __init__(self, v=0.1, epochs=100, target_tree_size=2, source_tree_size=2,
-                 alpha=0.7, min_samples_leaf=25, quantile = 0.9):
+                 alpha_0=1.0, decay_factor=0.99, min_samples_leaf=25, quantile = 0.9):
         self.v = v
         self.epochs = epochs
         self.target_tree_size = target_tree_size
         self.source_tree_size = source_tree_size
-        self.alpha = alpha
+        self.alpha_0 = alpha_0
+        self.decay_factor = decay_factor
         self.min_samples_leaf = min_samples_leaf
         self.quantile = quantile
         self.initial_guess = None
@@ -404,7 +412,7 @@ class MTransferTreeBoost():
         self.initial_guess = np.median(y_train_target)
         F = np.full(all_X.shape[0], self.initial_guess)
 
-        alpha = self.alpha
+        alpha = self.alpha_0
         self.model_tray_clf = []
         self.model_tray_clfhat = []
         self.leaf_gammas_tray = []
@@ -456,6 +464,7 @@ class MTransferTreeBoost():
             self.leaf_gammashats_tray.append(leaf_gammahat)
 
             self.alpha_tray.append(alpha)
+            alpha *= self.decay_factor
 
             # Build leaf → index mappings and store
             def build_leaf_index_mapping(*leaf_arrays):
@@ -479,7 +488,7 @@ class MTransferTreeBoost():
 
             if val_x is not None and val_y is not None:
                 val_preds = self.predict(val_x)
-                val_lad = compute_huber(val_preds, val_y, delta)
+                val_lad = compute_mae(val_preds, val_y) + compute_mse(val_preds, val_y)
                 val_losses.append(val_lad)
                 es = early_stopping(early_stopping_rounds, val_losses, tol = 1e-6)
                 
@@ -495,7 +504,7 @@ class MTransferTreeBoost():
 
             plt.title('Loss over epochs')
             plt.xlabel('epoch')
-            plt.ylabel('Huber loss')
+            plt.ylabel('MSE loss')
             plt.show()
 
         return self.leaf_gammas_tray, self.leaf_gammashats_tray, self.model_tray_clf, self.model_tray_clfhat, self.alpha_tray
