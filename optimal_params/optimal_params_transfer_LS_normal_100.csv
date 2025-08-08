@@ -1,0 +1,4 @@
+,disturbance_level,source_tree_size,target_tree_size,v,tau,alpha_0,epochs,total_rmse,total_mae
+55,1,2,1,0.2,1.0,0.5,1000,1.93,1.54
+50,1,2,1,0.15,1.0,0.5,1000,1.95,1.55
+10,1,1,1,0.15,1.0,0.5,1000,1.97,1.58
