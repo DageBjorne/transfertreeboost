@@ -3,14 +3,15 @@ import matplotlib.pyplot as plt
 from utils import *
 
 class LSTransferTreeBoost():
-    def __init__(self, v=0.1, epochs=100, target_tree_size=2, source_tree_size=2, alpha = 0.5, linear_decay = True, min_samples_leaf=25):
+    def __init__(self, v=0.1, epochs=100, target_tree_size=2, source_tree_size=2, alpha = 0.5, decay = True, decay_factor = 0.99, min_samples_leaf=25):
         self.v = v
         self.epochs = epochs
         self.target_tree_size = target_tree_size
         self.source_tree_size = source_tree_size
         self.min_samples_leaf = min_samples_leaf
         self.alpha = alpha
-        self.linear_decay = linear_decay
+        self.decay = decay
+        self.decay_factor = decay_factor
 
         self.model_tray_clf = []
         self.model_tray_clfhat = []
@@ -127,9 +128,9 @@ class LSTransferTreeBoost():
             
             alphas.append(self.alpha)
             self.alpha_tray.append(self.alpha)
-            if self.linear_decay:
-                self.alpha -= 10*self.alpha / self.epochs
-                self.alpha = max(0, self.alpha)
+            if self.decay:
+                self.alpha *= self.decay_factor
+                #self.alpha = max(0, self.alpha)
 
             # Build leaf → index mappings and store
             def build_leaf_index_mapping(*leaf_arrays):
