@@ -1,0 +1,6 @@
+,seed,disturbance_level,rmse,mae,source_tree_size,target_tree_size,v,alpha,decay,decay_factor,epochs,method
+0,1,1,1.3292869579898412,1.0440291037571432,2,1,0.03,1.0,True,0.99,1000,LSTransferTreeBoost
+1,2,1,1.4063714395013716,1.1045636129533738,2,1,0.03,1.0,True,0.99,1000,LSTransferTreeBoost
+2,3,1,1.288386017434066,1.0270705114339098,2,1,0.03,1.0,True,0.99,1000,LSTransferTreeBoost
+3,4,1,1.2343686596080707,0.9637043743598351,2,1,0.03,1.0,True,0.99,1000,LSTransferTreeBoost
+4,5,1,1.4467529238243646,1.1579088479071937,2,1,0.03,1.0,True,0.99,1000,LSTransferTreeBoost
