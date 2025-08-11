@@ -29,15 +29,6 @@ def compute_mae(predictions, targets):
     """Compute Root Mean Squared Error (RMSE)."""
     return np.mean(np.abs(predictions - targets))
 
-#optimization
-def compute_alpha(y, F, Fhat):
-    numerator = np.sum(y * Fhat) - np.sum(F*Fhat)
-    denominator = np.sum(Fhat ** 2)
-    
-    if denominator == 0:
-        raise ValueError("Denominator is zero, cannot compute alpha")
-    
-    return numerator / denominator
 
 def compute_huber(predictions, targets, delta):
     residuals = np.abs(predictions - targets)

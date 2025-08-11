@@ -3,13 +3,14 @@ import matplotlib.pyplot as plt
 from utils import *
 
 class LSTransferTreeBoost():
-    def __init__(self, v=0.1, epochs=100, target_tree_size=2, source_tree_size=2, min_samples_leaf=25):
+    def __init__(self, v=0.1, epochs=100, target_tree_size=2, source_tree_size=2, alpha = 0.5, linear_decay = True, min_samples_leaf=25):
         self.v = v
         self.epochs = epochs
         self.target_tree_size = target_tree_size
         self.source_tree_size = source_tree_size
         self.min_samples_leaf = min_samples_leaf
-        self.initial_guess = None
+        self.alpha = alpha
+        self.linear_decay = linear_decay
 
         self.model_tray_clf = []
         self.model_tray_clfhat = []
@@ -76,6 +77,7 @@ class LSTransferTreeBoost():
         self.alpha_tray = []
         self.leaf_index_map_clf = []
         self.leaf_index_map_clfhat = []
+        alphas = []
 
         if show_curves:
             losses = []
@@ -114,11 +116,20 @@ class LSTransferTreeBoost():
                 np.unique(all_leaves_clf), indexed_leaves_clf,
                 np.unique(all_leaves_clfhat), indexed_leaves_clfhat,
                 y_train_target_residuals)
+           # print(leaf_gammahat)
+           # print(leaf_gamma)
+            
 
             self.leaf_gammas_tray.append(leaf_gamma)
             self.leaf_gammashats_tray.append(leaf_gammahat)
-            alpha = compute_alpha(y_train_target_residuals, clf.predict(x_train_target), clfhat.predict(x_train_target))
-            self.alpha_tray.append(alpha)
+            
+            
+            
+            alphas.append(self.alpha)
+            self.alpha_tray.append(self.alpha)
+            if self.linear_decay:
+                self.alpha -= 10*self.alpha / self.epochs
+                self.alpha = max(0, self.alpha)
 
             # Build leaf → index mappings and store
             def build_leaf_index_mapping(*leaf_arrays):
@@ -134,9 +145,9 @@ class LSTransferTreeBoost():
             #print(alpha)
 
             for index in np.unique(indexed_all_clf):
-                F[indexed_all_clf == index] += self.v * leaf_gamma[index]
+                F[indexed_all_clf == index] += self.v * leaf_gamma[index] 
             for index in np.unique(indexed_all_clfhat):
-                F[indexed_all_clfhat == index] += self.v * leaf_gammahat[index] * alpha
+                F[indexed_all_clfhat == index] += self.v * leaf_gammahat[index] * self.alpha
 
 
 
@@ -162,7 +173,8 @@ class LSTransferTreeBoost():
             plt.ylabel('MSE')
             plt.show()
 
-        return self.leaf_gammas_tray, self.leaf_gammashats_tray, self.model_tray_clf, self.model_tray_clfhat, self.alpha_tray
+
+        return self.leaf_gammas_tray, self.leaf_gammashats_tray, self.model_tray_clf, self.model_tray_clfhat, self.alpha_tray, alphas
 
 class LADTransferTreeBoost():
     def __init__(self, v=0.1, epochs=100, target_tree_size=2, source_tree_size=2,
@@ -210,7 +222,7 @@ class LADTransferTreeBoost():
 
             for index in np.unique(indexed_leaves_clf_test):
                 if index == -1: continue
-                F_pred[indexed_leaves_clf_test == index] += v * leaf_gamma[index] * (1 - alpha)
+                F_pred[indexed_leaves_clf_test == index] += v * leaf_gamma[index] 
 
             for index in np.unique(indexed_leaves_clfhat_test):
                 if index == -1: continue
