@@ -29,6 +29,52 @@ def compute_mae(predictions, targets):
     """Compute Root Mean Squared Error (RMSE)."""
     return np.mean(np.abs(predictions - targets))
 
+def compute_alpha(y, F, Fhat):
+    num = np.sum(y*F) - np.sum(F*Fhat)
+    denom = np.sum(F**2)
+    return (num / denom)
+
+def compute_alpha_mixture(y, F, Fhat):
+    d = Fhat - F
+    num = np.sum((y - F) * d)
+    denom = np.sum(d**2)
+    if denom == 0:
+        return 0.0  # or 1.0, depending on your convention
+    alpha_star = num / denom
+    if alpha_star < 0:
+        return 0.0
+    elif alpha_star > 1:
+        return 1.0
+    else:
+        return alpha_star
+
+def sigmoid_scheduler(m, m_max=16, k=0.3):
+    """
+    Sigmoid-like schedule from 0 to 1 over m in [0, m_max].
+
+    Parameters
+    ----------
+    m : int or array-like
+        Current iteration(s).
+    m_max : int
+        Maximum number of iterations (center of convergence).
+    k : float
+        Steepness of the curve. Larger k -> steeper transition.
+
+    Returns
+    -------
+    float or np.ndarray
+        Schedule value between 0 and 1.
+    """
+    # Center sigmoid at m_max/2 so it ramps up in the middle
+    return 1 / (1 + np.exp(-k * (m - m_max/2)))
+
+def reverse_sigmoid_scheduler(m, m_max=40, k=0.1):
+    """
+    Reverse sigmoid: starts at 1, goes to 0 by m_max.
+    """
+    return 1 - (1 / (1 + np.exp(-k * (m - m_max/2))))
+
 
 def compute_huber(predictions, targets, delta):
     residuals = np.abs(predictions - targets)
@@ -79,7 +125,7 @@ def find_gamma_gammahat(unique_leaves_clf, indexed_leaves_clf,
 
     gamma_vector = np.linalg.lstsq(M, r, rcond=None)[0]
 
-    leaf_gamma = gamma_vector[:len(unique_leaves_clf)]
+    leaf_gamma = gamma_vector[:len(unique_leaves_clf)] 
     leaf_gammahat = gamma_vector[len(unique_leaves_clf):]
     return leaf_gamma, leaf_gammahat
 
