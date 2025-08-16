@@ -75,6 +75,12 @@ def reverse_sigmoid_scheduler(m, m_max=40, k=0.1):
     """
     return 1 - (1 / (1 + np.exp(-k * (m - m_max/2))))
 
+def reverse_sigmoid_decay(m, k = 0.2, m_0 = 10):
+    return 1 / (1 + np.exp(k*(m - m_0)))
+
+def exponential_decay(m):
+    return np.exp(-m)
+
 
 def compute_huber(predictions, targets, delta):
     residuals = np.abs(predictions - targets)
