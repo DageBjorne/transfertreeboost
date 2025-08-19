@@ -1,4 +1,0 @@
-,source_tree_size,target_tree_size,v,alpha,decay,decay_factor,epochs,total_rmse,total_mae
-15,2,1,0.03,1.0,True,0.97,1000,73.82,50.24
-6,2,1,0.02,1.0,True,0.99,1000,73.87,49.92
-21,2,1,0.03,1.0,True,0.99,1000,73.88,49.8

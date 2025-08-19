@@ -1,2 +1,0 @@
-,seed,disturbance_level,rmse,mae,source_tree_size,target_tree_size,v,alpha,decay,decay_factor,epochs,method
-0,1,1,2.0326127802011333,1.5916850676398266,2,1,0.02,1.0,True,1.0,1000,LSTransferTreeBoost

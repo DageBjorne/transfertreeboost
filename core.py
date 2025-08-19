@@ -126,7 +126,8 @@ class LSTransferTreeBoost():
             self.leaf_gammashats_tray.append(leaf_gammahat)
 
             if self.reverse_sigmoid_scheduler:
-                alpha = reverse_sigmoid_decay(m, self.k, self.m_0)
+                alpha = exponential_decay(m, self.k, self.m_0)
+                #alpha = reverse_sigmoid_decay(m, self.k, self.m_0)
                # self.alpha *= self.decay_factor
             
             self.alpha_tray.append(alpha)
