@@ -74,24 +74,56 @@ def predict_twostagetradaboostr2(X_target_test, model):
     return preds
 
 #MLP
+import torch
+
 class MLP(torch.nn.Module):
-    def __init__(self, input_size, hidden_size_1, hidden_size_2, hidden_size_3, output_size):
+    def __init__(self, input_size, hidden_size_1, hidden_size_2, hidden_size_3, output_size, dropout_rate=0.0, include_batch_norm=True):
         super(MLP, self).__init__()
-        self.fc1 = torch.nn.Linear(input_size, hidden_size_1)  # first layer
-        self.fc2 = torch.nn.Linear(hidden_size_1, hidden_size_2)  # first layer
-        self.fc3 = torch.nn.Linear(hidden_size_2, hidden_size_3)  # first layer
-        self.relu = torch.nn.ReLU()                          # activation
-        self.fc4 = torch.nn.Linear(hidden_size_3, output_size) # output layer
+        
+        self.include_batch_norm = include_batch_norm
+        
+        # Layers
+        self.fc1 = torch.nn.Linear(input_size, hidden_size_1)
+        self.fc2 = torch.nn.Linear(hidden_size_1, hidden_size_2)
+        self.fc3 = torch.nn.Linear(hidden_size_2, hidden_size_3)
+        self.fc4 = torch.nn.Linear(hidden_size_3, output_size)
+        
+        # Optional BatchNorm
+        if include_batch_norm:
+            self.bn1 = torch.nn.BatchNorm1d(hidden_size_1)
+            self.bn2 = torch.nn.BatchNorm1d(hidden_size_2)
+            self.bn3 = torch.nn.BatchNorm1d(hidden_size_3)
+        
+        # Activation + Dropout
+        self.relu = torch.nn.ReLU()
+        self.dropout = torch.nn.Dropout(dropout_rate)
 
     def forward(self, x):
+        # Layer 1
         x = self.fc1(x)
+        if self.include_batch_norm:
+            x = self.bn1(x)
         x = self.relu(x)
+        x = self.dropout(x)
+
+        # Layer 2
         x = self.fc2(x)
+        if self.include_batch_norm:
+            x = self.bn2(x)
         x = self.relu(x)
+        x = self.dropout(x)
+
+        # Layer 3
         x = self.fc3(x)
+        if self.include_batch_norm:
+            x = self.bn3(x)
         x = self.relu(x)
+        x = self.dropout(x)
+
+        # Output
         x = self.fc4(x)
         return x
+
     
 def process_dataset_for_base_network(X_source_train, y_source_train, batch_size = 32):
     scaler = StandardScaler()
@@ -107,32 +139,63 @@ def process_dataset_for_base_network(X_source_train, y_source_train, batch_size 
 
     return dataloader_train
 
-def train_mlp_on_source(dataloader_train, mlp, epochs=100):
-    criterion = torch.nn.MSELoss()
-    optimizer = torch.optim.Adam(mlp.parameters(), lr=1e-4)
-    train_loss = []
-    for epoch in range(epochs):  # loop over the dataset multiple times
-        
-        mlp.train()
-        running_loss = []
-        for i, data in enumerate(dataloader_train):
-            # get the inputs; data is a list of [inputs, labels]
-            inputs, labels = data
-            # zero the parameter gradients
-            optimizer.zero_grad()
+import torch
+import numpy as np
+from torch.utils.data import random_split, DataLoader
 
-            # forward + backward + optimize
+def train_mlp_on_source(dataloader_train, mlp, learning_rate = 1e-4, epochs=1000):
+
+    # ---- Split dataset ----
+    dataset = dataloader_train.dataset
+    train_size = int(0.75 * len(dataset))
+    val_size = len(dataset) - train_size
+    train_dataset, val_dataset = random_split(dataset, [train_size, val_size])
+
+    dataloader_train = DataLoader(train_dataset, batch_size=dataloader_train.batch_size, shuffle=True)
+    dataloader_val = DataLoader(val_dataset, batch_size=dataloader_train.batch_size, shuffle=False)
+
+    # ---- Loss & Optimizer ----
+    criterion = torch.nn.MSELoss()
+    optimizer = torch.optim.Adam(mlp.parameters(), lr=learning_rate)
+
+    train_losses, val_losses = [], []
+
+    # ---- Training Loop ----
+    for epoch in range(epochs):
+        mlp.train()
+        running_train_loss = []
+
+        for inputs, labels in dataloader_train:
+            optimizer.zero_grad()
             outputs = mlp(inputs)
             loss = criterion(outputs, labels)
             loss.backward()
             optimizer.step()
+            running_train_loss.append(np.sqrt(loss.item()))
 
-            # print statistics
+        train_loss = np.mean(running_train_loss)
+        train_losses.append(train_loss)
+
+        # ---- Validation ----
+        mlp.eval()
+        running_loss = []
+        for i, data in enumerate(dataloader_val):
+            inputs, labels = data
+            outputs = mlp(inputs)
+            loss = criterion(outputs, labels)
             running_loss.append(np.sqrt(loss.item()))
 
         running_loss = np.mean(running_loss)  
-        train_loss.append(running_loss)  
-    return mlp
+        val_losses.append(running_loss)  
+
+        if epoch > 0:
+            if early_stopping(4, val_losses, tol=1e-6):
+                break
+
+    return mlp, train_losses, val_losses
+
+    
+
 
 def process_datasets_for_finetuning(X_target_train, y_target_train,
                                     X_target_val, y_target_val, X_target_test, y_target_test, batch_size=32):
@@ -167,7 +230,7 @@ def process_datasets_for_finetuning(X_target_train, y_target_train,
 
     return train_dl, val_dl, test_dl
 
-def finetune_mlp_on_target(dataloader_train, dataloader_val, mlp, epochs=100, freeze_layers=None):
+def finetune_mlp_on_target(dataloader_train, dataloader_val, mlp, epochs=100, learning_rate = 5e-5, freeze_layers=None):
     # --- Freeze layers if requested ---
     if freeze_layers is not None:
         for name, param in mlp.named_parameters():
@@ -176,7 +239,7 @@ def finetune_mlp_on_target(dataloader_train, dataloader_val, mlp, epochs=100, fr
                 print(f"Freezing {name}")
 
     criterion = torch.nn.MSELoss()
-    optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, mlp.parameters()), lr=5e-5)
+    optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, mlp.parameters()), lr=learning_rate)
     
     train_loss = []
     val_loss = []
@@ -204,7 +267,7 @@ def finetune_mlp_on_target(dataloader_train, dataloader_val, mlp, epochs=100, fr
             inputs, labels = data
             outputs = mlp(inputs)
             loss = criterion(outputs, labels)
-            running_loss.append(np.sqrt(loss.item()))
+            running_loss.append(loss.item())
 
         running_loss = np.mean(running_loss)  
         val_loss.append(running_loss)  
