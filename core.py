@@ -3,14 +3,12 @@ import matplotlib.pyplot as plt
 from utils import *
 
 class LSTransferTreeBoost():
-    def __init__(self, v=0.1, epochs=100, target_tree_size=2, source_tree_size=2, alpha_0=1.0, reverse_sigmoid_scheduler = True, k=0.2, m_0=10, min_samples_leaf=25):
+    def __init__(self, v=0.1, epochs=100, target_tree_size=2, source_tree_size=2, k=0.2, m_0=10, min_samples_leaf=25):
         self.v = v
         self.epochs = epochs
         self.target_tree_size = target_tree_size
         self.source_tree_size = source_tree_size
         self.min_samples_leaf = min_samples_leaf
-        self.alpha_0 = alpha_0
-        self.reverse_sigmoid_scheduler = reverse_sigmoid_scheduler
         self.k = k
         self.m_0 = m_0
 
@@ -79,7 +77,6 @@ class LSTransferTreeBoost():
         self.alpha_tray = []
         self.leaf_index_map_clf = []
         self.leaf_index_map_clfhat = []
-        alpha = self.alpha_0 #initialize alpha
 
         if show_curves:
             losses = []
@@ -125,10 +122,8 @@ class LSTransferTreeBoost():
             self.leaf_gammas_tray.append(leaf_gamma)
             self.leaf_gammashats_tray.append(leaf_gammahat)
 
-            if self.reverse_sigmoid_scheduler:
-                alpha = exponential_decay(m, self.k, self.m_0)
-                #alpha = reverse_sigmoid_decay(m, self.k, self.m_0)
-               # self.alpha *= self.decay_factor
+            
+            alpha = exponential_decay(m, self.k, self.m_0)
             
             self.alpha_tray.append(alpha)
 
@@ -184,17 +179,14 @@ class LSTransferTreeBoost():
 
 class LADTransferTreeBoost():
     def __init__(self, v=0.1, epochs=100, target_tree_size=2, source_tree_size=2,
-                 alpha_0 = 1.0, reverse_sigmoid_scheduler = True, k=0.2, m_0=10, min_samples_leaf=25, optimizer_package = 'scipy'):
+                 k=0.2, m_0=10, min_samples_leaf=25, optimizer_package = 'scipy'):
         self.v = v
         self.epochs = epochs
         self.target_tree_size = target_tree_size
         self.source_tree_size = source_tree_size
-        self.alpha_0 = alpha_0
-        self.reverse_sigmoid_scheduler = reverse_sigmoid_scheduler
         self.k = k
         self.m_0 = m_0
         self.min_samples_leaf = min_samples_leaf
-        self.initial_guess = None
         self.optimizer_package = optimizer_package
 
         self.model_tray_clf = []
@@ -262,7 +254,6 @@ class LADTransferTreeBoost():
         self.alpha_tray = []
         self.leaf_index_map_clf = []
         self.leaf_index_map_clfhat = []
-        alpha = self.alpha_0 #initialize alpha
 
         if show_curves:
             losses = []
@@ -312,8 +303,8 @@ class LADTransferTreeBoost():
             self.leaf_gammas_tray.append(leaf_gamma)
             self.leaf_gammashats_tray.append(leaf_gammahat)
             
-            if self.reverse_sigmoid_scheduler:
-                alpha = reverse_sigmoid_decay(m, self.k, self.m_0)
+            alpha = exponential_decay(m, self.k, self.m_0)
+            
             self.alpha_tray.append(alpha)
 
             # Build leaf → index mappings and store
@@ -329,9 +320,9 @@ class LADTransferTreeBoost():
             indexed_all_clfhat = map_leaves_to_number(all_leaves_clfhat)
 
             for index in np.unique(indexed_all_clf):
-                F[indexed_all_clf == index] += self.v * leaf_gamma[index] * (1-self.alpha) 
+                F[indexed_all_clf == index] += self.v * leaf_gamma[index] * (1-alpha) 
             for index in np.unique(indexed_all_clfhat):
-                F[indexed_all_clfhat == index] += self.v * leaf_gammahat[index] * self.alpha
+                F[indexed_all_clfhat == index] += self.v * leaf_gammahat[index] * alpha
 
             if show_curves:
                 losses.append(compute_mae(F[target_indices], y_train_target))
@@ -364,17 +355,15 @@ class LADTransferTreeBoost():
 #Huber Loss, should stay the same
 class MTransferTreeBoost():
     def __init__(self, v=0.1, epochs=100, target_tree_size=2, source_tree_size=2,
-                 alpha_0=1.0, decay = True, decay_factor=0.99, min_samples_leaf=25, quantile = 0.9):
+                 k=0.2, m_0=10, min_samples_leaf=25, quantile = 0.9):
         self.v = v
         self.epochs = epochs
         self.target_tree_size = target_tree_size
         self.source_tree_size = source_tree_size
-        self.alpha_0 = alpha_0
-        self.decay = decay
-        self.decay_factor = decay_factor
+        self.k = k
+        self.m_0 = m_0
         self.min_samples_leaf = min_samples_leaf
         self.quantile = quantile
-        self.initial_guess = None
 
         self.model_tray_clf = []
         self.model_tray_clfhat = []
@@ -483,10 +472,9 @@ class MTransferTreeBoost():
 
             self.leaf_gammas_tray.append(leaf_gamma)
             self.leaf_gammashats_tray.append(leaf_gammahat)
-
-            self.alpha_tray.append(self.alpha)
-            if self.decay:
-                self.alpha *= self.decay_factor
+            alpha = exponential_decay(m, self.k, self.m_0)
+            
+            self.alpha_tray.append(alpha)
 
             # Build leaf → index mappings and store
             def build_leaf_index_mapping(*leaf_arrays):
@@ -501,9 +489,9 @@ class MTransferTreeBoost():
             indexed_all_clfhat = map_leaves_to_number(all_leaves_clfhat)
 
             for index in np.unique(indexed_all_clf):
-                F[indexed_all_clf == index] += self.v * leaf_gamma[index] * (1-self.alpha)
+                F[indexed_all_clf == index] += self.v * leaf_gamma[index] * (1-alpha)
             for index in np.unique(indexed_all_clfhat):
-                F[indexed_all_clfhat == index] += self.v * leaf_gammahat[index] * self.alpha
+                F[indexed_all_clfhat == index] += self.v * leaf_gammahat[index] * alpha
 
             if show_curves:
                 losses.append(compute_huber(F[target_indices], y_train_target, delta))
