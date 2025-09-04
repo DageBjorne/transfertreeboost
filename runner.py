@@ -1,4 +1,4 @@
-from custom_function_boost_search_v2 import train_run
+from experiments_src.simulations import train_run
 import argparse
 
 #v1_list = [0.005, 0.007, 0.01, 0.03, 0.07]
