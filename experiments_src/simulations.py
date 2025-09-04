@@ -204,6 +204,9 @@ def train_run(v):
                     mae = fiter.evaluate(X_target_test, y_target_test, metric = 'mae')
                     val_mae = fiter.evaluate(X_target_val, y_target_val, metric = 'mae')
                     ablation_transfer_normal_normal.loc[len(ablation_transfer_normal_normal)] = [seed, target_instances, d, method, v, source_tree_size, target_tree_size, k, m_0, val_rmse, val_mae, rmse, mae]
+                    import os
+                    cwd = os.getcwd()
+                    print(cwd)
                     ablation_transfer_normal_normal.to_csv(f'results/LSTransferTreeBoost_ablation_friedman.csv')
 
 
