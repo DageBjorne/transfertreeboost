@@ -1,2 +1,0 @@
-,seed,method,v,source_tree_size,target_tree_size,k,m_0,rmse,mae
-0,2,LSTransferTreeBoost,0.05,1,1,0.01,0.5,7.111721623911179,4.823325932858167

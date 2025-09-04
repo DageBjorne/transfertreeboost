@@ -127,6 +127,7 @@ class MLP(torch.nn.Module):
     
 def process_dataset_for_base_network(X_source_train, y_source_train, batch_size = 32):
     scaler = StandardScaler()
+    X_source_train = np.nan_to_num(X_source_train, nan=0.0)  # Replace NaN with 0
     X = scaler.fit_transform(X_source_train)
     X = torch.tensor(X, dtype=torch.float32)
     y = torch.tensor(y_source_train, dtype=torch.float32).view(-1,1)
@@ -203,8 +204,11 @@ def process_datasets_for_finetuning(X_target_train, y_target_train,
     
     # --- Scale using train stats only ---
     scaler = StandardScaler()
+    X_target_train = np.nan_to_num(X_target_train, nan=0.0)  # Replace NaN with 0
     X_train = scaler.fit_transform(X_target_train)
+    X_target_val = np.nan_to_num(X_target_val, nan=0.0)  # Replace NaN with 0
     X_val   = scaler.transform(X_target_val)
+    X_target_test = np.nan_to_num(X_target_test, nan=0.0)  # Replace NaN with 0
     X_test  = scaler.transform(X_target_test)
 
 
