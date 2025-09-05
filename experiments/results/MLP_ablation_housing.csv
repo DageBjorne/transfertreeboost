@@ -1,4 +1,0 @@
-,seed,splitting_variable,method,base_lr,fine_tuning_lr,dropout_rate,batch_norm,val_rmse,val_mae,rmse,mae
-0,1,median_income,MLP,0.0005,0.0001,0.0,True,336471.0,317223.03,335347.7,315874.25
-1,1,median_income,MLP,0.0005,0.0001,0.0,False,1523630.1,1005082.56,1471368.8,1008302.6
-2,1,median_income,MLP,0.0005,0.0001,0.1,True,336650.62,317393.06,335523.97,316040.62

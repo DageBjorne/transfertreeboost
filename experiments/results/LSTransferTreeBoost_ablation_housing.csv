@@ -1,2 +1,0 @@
-,seed,splitting_variable,method,v,source_tree_size,target_tree_size,k,m_0,val_rmse,val_mae,rmse,mae
-0,1,median_income,LSTransferTreeBoost,0.05,1,1,0.01,0.5,101376.19216625798,84274.61027534193,102190.21397115027,84328.44459551501
