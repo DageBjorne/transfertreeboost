@@ -271,10 +271,11 @@ def train_run(d_idx):
                     import os
                     cwd = os.getcwd()
                     print(cwd)
+                    ablation_file = f'results/LSTransferTreeBoost_ablation_friedman.csv'
+                    file_exists = os.path.isfile(ablation_file)
+
                     ablation_transfer_normal_normal.to_csv(
-                        f'results/LSTransferTreeBoost_ablation_friedman.csv',
-                        mode='a',
-                        header=False)
+                        ablation_file, mode='a', header=not file_exists)
 
     #ablation study for transfertreeboost Gaussian errors, with gaussian source domain errors
     ablation_transfer_normal_normal = pd.DataFrame(columns=[
@@ -350,10 +351,11 @@ def train_run(d_idx):
                             target_tree_size, val_rmse, val_mae, rmse, mae
                         ]
 
+                    ablation_file = f'results/xgboost_ablation_friedman.csv'
+                    file_exists = os.path.isfile(ablation_file)
+
                     ablation_transfer_normal_normal.to_csv(
-                        f'results/xgboost_ablation_friedman.csv',
-                        mode='a',
-                        header=False)
+                        ablation_file, mode='a', header=not file_exists)
 
                     method = 'xgboost_naive_transfer'
                     params = {
@@ -384,10 +386,11 @@ def train_run(d_idx):
                             target_tree_size, val_rmse, val_mae, rmse, mae
                         ]
 
+                    ablation_file = f'results/xgboost_ablation_friedman.csv'
+                    file_exists = os.path.isfile(ablation_file)
+
                     ablation_transfer_normal_normal.to_csv(
-                        f'results/xgboost_ablation_friedman.csv',
-                        mode='a',
-                        header=False)
+                        ablation_file, mode='a', header=not file_exists)
 
     #also run mlp finetuning
     ablation_transfer_normal_normal = pd.DataFrame(columns=[
@@ -473,7 +476,10 @@ def train_run(d_idx):
                                         batch_norm, val_rmse, val_mae, rmse,
                                         mae
                                     ]
+                                ablation_file = f'results/MLP_ablation_friedman.csv'
+                                file_exists = os.path.isfile(ablation_file)
+
                                 ablation_transfer_normal_normal.to_csv(
-                                    f'results/MLP_ablation_friedman.csv',
+                                    ablation_file,
                                     mode='a',
-                                    header=False)
+                                    header=not file_exists)
