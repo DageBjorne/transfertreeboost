@@ -180,108 +180,111 @@ def friedman1_altered(n_samples,
 
 
 def train_run(d_idx):
+    import os
     d_list = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
     d_list = [d_list[int(d_idx)]]
     #ablation study for LSTransferTreeBoost with Gaussian errors, with gaussian source domain errors
-    ablation_transfer_normal_normal = pd.DataFrame(columns=[
-        'seed', 'target_instances', 'd', 'method', 'v', 'source_tree_size',
-        'target_tree_size', 'k', 'm_0', 'val_rmse', 'val_mae', 'rmse', 'mae'
-    ])
-    v_list = [0.05, 0.1]
-    source_tree_size_list = [1, 2]
-    target_tree_size_list = [1, 2]
-    k_list = [0.01, 0.05]
-    m_0_list = [0.5, 0.9]
 
-    # --- Step 2: Create full parameter grid ---
-    param_grid = list(
-        itertools.product(v_list, source_tree_size_list, target_tree_size_list,
-                          k_list, m_0_list))
+    ####### LS TREE TRANSFER ######
+    # ablation_transfer_normal_normal = pd.DataFrame(columns=[
+    #     'seed', 'target_instances', 'd', 'method', 'v', 'source_tree_size',
+    #     'target_tree_size', 'k', 'm_0', 'val_rmse', 'val_mae', 'rmse', 'mae'
+    # ])
+    # v_list = [0.05, 0.1]
+    # source_tree_size_list = [1, 2]
+    # target_tree_size_list = [1, 2]
+    # k_list = [0.01, 0.05]
+    # m_0_list = [0.5, 0.9]
 
-    for seed in seed_list:
-        for target_instances in target_instances_list:
+    # # --- Step 2: Create full parameter grid ---
+    # param_grid = list(
+    #     itertools.product(v_list, source_tree_size_list, target_tree_size_list,
+    #                       k_list, m_0_list))
 
-            X_target_test, y_target_test = friedman1(
-                n_samples=test_size,
-                add_noise=False,
-                noise_distribution='gaussian',
-                n_features=10,
-                random_seed=seed)  #do NOT add noise to test set!!!!
-            X_target_val, y_target_val = friedman1(
-                n_samples=val_size,
-                add_noise=False,
-                noise_distribution='gaussian',
-                n_features=10,
-                random_seed=seed + 10)  #do NOT add noise to test set!!!!
-            X_target_train, y_target_train = friedman1(
-                n_samples=target_instances,
-                add_noise=True,
-                noise_distribution='gaussian',
-                n_features=10,
-                random_seed=seed)  #add noise to train set
-            for d in d_list:
-                X_source_train, y_source_train = friedman1_altered(
-                    n_samples=1000,
-                    add_noise=True,
-                    noise_distribution='gaussian',
-                    n_features=10,
-                    d=d,
-                    shift_seed=seed,
-                    random_seed=seed
-                )  #also add noise to source (only train here)
-                for config in param_grid:
-                    v, source_tree_size, target_tree_size, k, m_0 = config
+    # for seed in seed_list:
+    #     for target_instances in target_instances_list:
 
-                    #Test for all methods!!!!
+    #         X_target_test, y_target_test = friedman1(
+    #             n_samples=test_size,
+    #             add_noise=False,
+    #             noise_distribution='gaussian',
+    #             n_features=10,
+    #             random_seed=seed)  #do NOT add noise to test set!!!!
+    #         X_target_val, y_target_val = friedman1(
+    #             n_samples=val_size,
+    #             add_noise=False,
+    #             noise_distribution='gaussian',
+    #             n_features=10,
+    #             random_seed=seed + 10)  #do NOT add noise to test set!!!!
+    #         X_target_train, y_target_train = friedman1(
+    #             n_samples=target_instances,
+    #             add_noise=True,
+    #             noise_distribution='gaussian',
+    #             n_features=10,
+    #             random_seed=seed)  #add noise to train set
+    #         for d in d_list:
+    #             X_source_train, y_source_train = friedman1_altered(
+    #                 n_samples=1000,
+    #                 add_noise=True,
+    #                 noise_distribution='gaussian',
+    #                 n_features=10,
+    #                 d=d,
+    #                 shift_seed=seed,
+    #                 random_seed=seed
+    #             )  #also add noise to source (only train here)
+    #             for config in param_grid:
+    #                 v, source_tree_size, target_tree_size, k, m_0 = config
 
-                    method = f'LSTransferTreeBoost'
-                    fiter = LSTransferTreeBoost(
-                        epochs=1000,
-                        v=v,
-                        source_tree_size=source_tree_size,
-                        target_tree_size=target_tree_size,
-                        k=k,
-                        m_0=m_0)
-                    fiter.fit(X_target_train,
-                              y_target_train,
-                              X_source_train,
-                              y_source_train,
-                              val_x=X_target_val,
-                              val_y=y_target_val,
-                              early_stopping_rounds=8,
-                              show_curves=False)
-                    rmse = fiter.evaluate(X_target_test,
-                                          y_target_test,
-                                          metric='rmse')
-                    val_rmse = fiter.evaluate(X_target_val,
-                                              y_target_val,
-                                              metric='rmse')
-                    mae = fiter.evaluate(X_target_test,
-                                         y_target_test,
-                                         metric='mae')
-                    val_mae = fiter.evaluate(X_target_val,
-                                             y_target_val,
-                                             metric='mae')
-                    ablation_transfer_normal_normal = pd.DataFrame(columns=[
-                        'seed', 'target_instances', 'd', 'method', 'v',
-                        'source_tree_size', 'target_tree_size', 'k', 'm_0',
-                        'val_rmse', 'val_mae', 'rmse', 'mae'
-                    ])
-                    ablation_transfer_normal_normal.loc[len(
-                        ablation_transfer_normal_normal)] = [
-                            seed, target_instances, d, method, v,
-                            source_tree_size, target_tree_size, k, m_0,
-                            val_rmse, val_mae, rmse, mae
-                        ]
+    #                 #Test for all methods!!!!
 
-                    import os
-                    cwd = os.getcwd()
-                    print(cwd)
-                    ablation_file = f'results/LSTransferTreeBoost_ablation_friedman.csv'
-                    file_exists = os.path.isfile(ablation_file)
+    #                 method = f'LSTransferTreeBoost'
+    #                 fiter = LSTransferTreeBoost(
+    #                     epochs=1000,
+    #                     v=v,
+    #                     source_tree_size=source_tree_size,
+    #                     target_tree_size=target_tree_size,
+    #                     k=k,
+    #                     m_0=m_0)
+    #                 fiter.fit(X_target_train,
+    #                           y_target_train,
+    #                           X_source_train,
+    #                           y_source_train,
+    #                           val_x=X_target_val,
+    #                           val_y=y_target_val,
+    #                           early_stopping_rounds=8,
+    #                           show_curves=False)
+    #                 rmse = fiter.evaluate(X_target_test,
+    #                                       y_target_test,
+    #                                       metric='rmse')
+    #                 val_rmse = fiter.evaluate(X_target_val,
+    #                                           y_target_val,
+    #                                           metric='rmse')
+    #                 mae = fiter.evaluate(X_target_test,
+    #                                      y_target_test,
+    #                                      metric='mae')
+    #                 val_mae = fiter.evaluate(X_target_val,
+    #                                          y_target_val,
+    #                                          metric='mae')
+    #                 ablation_transfer_normal_normal = pd.DataFrame(columns=[
+    #                     'seed', 'target_instances', 'd', 'method', 'v',
+    #                     'source_tree_size', 'target_tree_size', 'k', 'm_0',
+    #                     'val_rmse', 'val_mae', 'rmse', 'mae'
+    #                 ])
+    #                 ablation_transfer_normal_normal.loc[len(
+    #                     ablation_transfer_normal_normal)] = [
+    #                         seed, target_instances, d, method, v,
+    #                         source_tree_size, target_tree_size, k, m_0,
+    #                         val_rmse, val_mae, rmse, mae
+    #                     ]
 
-                    ablation_transfer_normal_normal.to_csv(
-                        ablation_file, mode='a', header=not file_exists)
+    #                 import os
+    #                 cwd = os.getcwd()
+    #                 print(cwd)
+    #                 ablation_file = f'results/LSTransferTreeBoost_ablation_friedman.csv'
+    #                 file_exists = os.path.isfile(ablation_file)
+
+    #                 ablation_transfer_normal_normal.to_csv(
+    #                     ablation_file, mode='a', header=not file_exists)
 
     #ablation study for transfertreeboost Gaussian errors, with gaussian source domain errors
     ablation_transfer_normal_normal = pd.DataFrame(columns=[
@@ -354,8 +357,8 @@ def train_run(d_idx):
 
                     ablation_transfer_normal_normal = pd.DataFrame(columns=[
                         'seed', 'target_instances', 'd', 'method', 'v',
-                        'source_tree_size', 'target_tree_size', 'k', 'm_0',
-                        'val_rmse', 'val_mae', 'rmse', 'mae'
+                        'target_tree_size', 'val_rmse', 'val_mae', 'rmse',
+                        'mae'
                     ])
                     ablation_transfer_normal_normal.loc[len(
                         ablation_transfer_normal_normal)] = [
@@ -394,8 +397,8 @@ def train_run(d_idx):
                     mae = compute_mae(preds, y_target_test)
                     ablation_transfer_normal_normal = pd.DataFrame(columns=[
                         'seed', 'target_instances', 'd', 'method', 'v',
-                        'source_tree_size', 'target_tree_size', 'k', 'm_0',
-                        'val_rmse', 'val_mae', 'rmse', 'mae'
+                        'target_tree_size', 'val_rmse', 'val_mae', 'rmse',
+                        'mae'
                     ])
                     ablation_transfer_normal_normal.loc[len(
                         ablation_transfer_normal_normal)] = [
@@ -489,8 +492,8 @@ def train_run(d_idx):
                                 ablation_transfer_normal_normal = pd.DataFrame(
                                     columns=[
                                         'seed', 'target_instances', 'd',
-                                        'method', 'v', 'source_tree_size',
-                                        'target_tree_size', 'k', 'm_0',
+                                        'method', 'base_lr', 'fine_tuning_lr',
+                                        'dropout_rate', 'batch_norm',
                                         'val_rmse', 'val_mae', 'rmse', 'mae'
                                     ])
                                 ablation_transfer_normal_normal.loc[len(
