@@ -15,7 +15,8 @@ val_size = 1000
 target_instances_list = [100,200,300]
 source_instances = 1000 #we use a fixed number of source instances
 
-d_list = [1,2,3,4,5]
+#d_list = [1,2,3,4,5]
+d_list = [1,2,3,4,5,6,7,8,9,10]
 seed_list = [1,2,3,4,5]
 
 def gaussian_noise(n_samples, signal_y, snr=3.0, random_seed = None):
@@ -96,11 +97,14 @@ def friedman1_altered(n_samples, add_noise=False, noise_distribution='gaussian',
         np.random.seed(random_seed)
     
     #generate distrubance factors
-    a = np.random.normal(1, 0.2*d, size = 4)
+    #a = np.random.normal(1, 0.2*d, size = 4)
+    a = np.random.normal(1, 0.1*d, size = 4)
     a0, a1, a2, a3 = a
-    b = np.random.normal(1, 0.2*d, size = 5)
+    #b = np.random.normal(1, 0.2*d, size = 5)
+    b = np.random.normal(1, 0.1*d, size = 5)
     b0, b1, b2, b3, b4 = b
-    c = np.random.normal(0, 0.1*d, size = 5)
+    #c = np.random.normal(0, 0.1*d, size = 5)
+    c = np.random.normal(0, 0.05*d, size = 5)
     c0, c1, c2, c3, c4 = c
     #
 
