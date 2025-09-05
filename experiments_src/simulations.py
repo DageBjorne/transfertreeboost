@@ -272,7 +272,9 @@ def train_run(d_idx):
                     cwd = os.getcwd()
                     print(cwd)
                     ablation_transfer_normal_normal.to_csv(
-                        f'results/LSTransferTreeBoost_ablation_friedman.csv')
+                        f'results/LSTransferTreeBoost_ablation_friedman.csv',
+                        mode='a',
+                        header=False)
 
     #ablation study for transfertreeboost Gaussian errors, with gaussian source domain errors
     ablation_transfer_normal_normal = pd.DataFrame(columns=[
@@ -349,7 +351,9 @@ def train_run(d_idx):
                         ]
 
                     ablation_transfer_normal_normal.to_csv(
-                        f'results/xgboost_ablation_friedman.csv')
+                        f'results/xgboost_ablation_friedman.csv',
+                        mode='a',
+                        header=False)
 
                     method = 'xgboost_naive_transfer'
                     params = {
@@ -381,7 +385,9 @@ def train_run(d_idx):
                         ]
 
                     ablation_transfer_normal_normal.to_csv(
-                        f'results/xgboost_ablation_friedman.csv')
+                        f'results/xgboost_ablation_friedman.csv',
+                        mode='a',
+                        header=False)
 
     #also run mlp finetuning
     ablation_transfer_normal_normal = pd.DataFrame(columns=[
@@ -468,4 +474,6 @@ def train_run(d_idx):
                                         mae
                                     ]
                                 ablation_transfer_normal_normal.to_csv(
-                                    f'results/MLP_ablation_friedman.csv')
+                                    f'results/MLP_ablation_friedman.csv',
+                                    mode='a',
+                                    header=False)
