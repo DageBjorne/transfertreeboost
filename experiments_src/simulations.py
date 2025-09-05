@@ -262,12 +262,18 @@ def train_run(d_idx):
                     val_mae = fiter.evaluate(X_target_val,
                                              y_target_val,
                                              metric='mae')
+                    ablation_transfer_normal_normal = pd.DataFrame(columns=[
+                        'seed', 'target_instances', 'd', 'method', 'v',
+                        'source_tree_size', 'target_tree_size', 'k', 'm_0',
+                        'val_rmse', 'val_mae', 'rmse', 'mae'
+                    ])
                     ablation_transfer_normal_normal.loc[len(
                         ablation_transfer_normal_normal)] = [
                             seed, target_instances, d, method, v,
                             source_tree_size, target_tree_size, k, m_0,
                             val_rmse, val_mae, rmse, mae
                         ]
+
                     import os
                     cwd = os.getcwd()
                     print(cwd)
@@ -345,6 +351,12 @@ def train_run(d_idx):
                     preds = test_xgboost(X_target_test, bst)
                     rmse = compute_rmse(preds, y_target_test)
                     mae = compute_mae(preds, y_target_test)
+
+                    ablation_transfer_normal_normal = pd.DataFrame(columns=[
+                        'seed', 'target_instances', 'd', 'method', 'v',
+                        'source_tree_size', 'target_tree_size', 'k', 'm_0',
+                        'val_rmse', 'val_mae', 'rmse', 'mae'
+                    ])
                     ablation_transfer_normal_normal.loc[len(
                         ablation_transfer_normal_normal)] = [
                             seed, target_instances, d, method, v,
@@ -380,6 +392,11 @@ def train_run(d_idx):
                     preds = test_xgboost(X_target_test, bst)
                     rmse = compute_rmse(preds, y_target_test)
                     mae = compute_mae(preds, y_target_test)
+                    ablation_transfer_normal_normal = pd.DataFrame(columns=[
+                        'seed', 'target_instances', 'd', 'method', 'v',
+                        'source_tree_size', 'target_tree_size', 'k', 'm_0',
+                        'val_rmse', 'val_mae', 'rmse', 'mae'
+                    ])
                     ablation_transfer_normal_normal.loc[len(
                         ablation_transfer_normal_normal)] = [
                             seed, target_instances, method, d, v,
@@ -469,6 +486,13 @@ def train_run(d_idx):
                                     dataloader_val, mlp)
                                 rmse, mae = test_final_mlp(
                                     dataloader_test, mlp)
+                                ablation_transfer_normal_normal = pd.DataFrame(
+                                    columns=[
+                                        'seed', 'target_instances', 'd',
+                                        'method', 'v', 'source_tree_size',
+                                        'target_tree_size', 'k', 'm_0',
+                                        'val_rmse', 'val_mae', 'rmse', 'mae'
+                                    ])
                                 ablation_transfer_normal_normal.loc[len(
                                     ablation_transfer_normal_normal)] = [
                                         seed, target_instances, d, method,
