@@ -17,7 +17,7 @@ target_instances_list = [100, 200, 300]
 source_instances = 1000  #we use a fixed number of source instances
 
 #d_list = [1,2,3,4,5]
-#d_list = [1,2,3,4,5,6,7,8,9,10]
+#d_list = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 seed_list = [1, 2, 3, 4, 5]
 
 
@@ -181,6 +181,7 @@ def friedman1_altered(n_samples,
 
 def train_run(d_idx):
     d_list = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+    d_list = [d_list[int(d_idx)]]
     #ablation study for LSTransferTreeBoost with Gaussian errors, with gaussian source domain errors
     ablation_transfer_normal_normal = pd.DataFrame(columns=[
         'seed', 'target_instances', 'd', 'method', 'v', 'source_tree_size',
@@ -218,7 +219,7 @@ def train_run(d_idx):
                 noise_distribution='gaussian',
                 n_features=10,
                 random_seed=seed)  #add noise to train set
-            for d in d_list[d_idx]:
+            for d in d_list:
                 X_source_train, y_source_train = friedman1_altered(
                     n_samples=1000,
                     add_noise=True,
@@ -306,7 +307,7 @@ def train_run(d_idx):
                 noise_distribution='gaussian',
                 n_features=10,
                 random_seed=seed)  #add noise to train set
-            for d in d_list[d_idx]:
+            for d in d_list:
                 X_source_train, y_source_train = friedman1_altered(
                     n_samples=1000,
                     add_noise=True,
@@ -412,7 +413,7 @@ def train_run(d_idx):
                 noise_distribution='gaussian',
                 n_features=10,
                 random_seed=seed)  #add noise to train set
-            for d in d_list[d_idx]:
+            for d in d_list:
                 X_source_train, y_source_train = friedman1_altered(
                     n_samples=1000,
                     add_noise=True,
