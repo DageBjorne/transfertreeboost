@@ -287,130 +287,130 @@ def train_run(d_idx):
     #                     ablation_file, mode='a', header=not file_exists)
 
     #ablation study for transfertreeboost Gaussian errors, with gaussian source domain errors
-    ablation_transfer_normal_normal = pd.DataFrame(columns=[
-        'seed', 'target_instances', 'd', 'method', 'v', 'target_tree_size',
-        'val_rmse', 'val_mae', 'rmse', 'mae'
-    ])
+    # ablation_transfer_normal_normal = pd.DataFrame(columns=[
+    #     'seed', 'target_instances', 'd', 'method', 'v', 'target_tree_size',
+    #     'val_rmse', 'val_mae', 'rmse', 'mae'
+    # ])
 
-    v_list = [0.01, 0.02, 0.05, 0.1, 0.15]
-    target_tree_size_list = [1, 2, 3, 4]
+    # v_list = [0.01, 0.02, 0.05, 0.1, 0.15]
+    # target_tree_size_list = [1, 2, 3, 4]
 
-    # --- Step 2: Create full parameter grid ---
-    param_grid = list(itertools.product(v_list, target_tree_size_list))
+    # # --- Step 2: Create full parameter grid ---
+    # param_grid = list(itertools.product(v_list, target_tree_size_list))
 
-    for seed in seed_list:
-        for target_instances in target_instances_list:
+    # for seed in seed_list:
+    #     for target_instances in target_instances_list:
 
-            X_target_test, y_target_test = friedman1(
-                n_samples=test_size,
-                add_noise=False,
-                noise_distribution='gaussian',
-                n_features=10,
-                random_seed=seed)  #do NOT add noise to test set!!!!
-            X_target_val, y_target_val = friedman1(
-                n_samples=val_size,
-                add_noise=False,
-                noise_distribution='gaussian',
-                n_features=10,
-                random_seed=seed + 10)  #do NOT add noise to test set!!!!
-            X_target_train, y_target_train = friedman1(
-                n_samples=target_instances,
-                add_noise=True,
-                noise_distribution='gaussian',
-                n_features=10,
-                random_seed=seed)  #add noise to train set
-            for d in d_list:
-                X_source_train, y_source_train = friedman1_altered(
-                    n_samples=1000,
-                    add_noise=True,
-                    noise_distribution='gaussian',
-                    n_features=10,
-                    d=d,
-                    shift_seed=seed,
-                    random_seed=seed
-                )  #also add noise to source (only train here)
-                for config in param_grid:
-                    v, target_tree_size = config
+    #         X_target_test, y_target_test = friedman1(
+    #             n_samples=test_size,
+    #             add_noise=False,
+    #             noise_distribution='gaussian',
+    #             n_features=10,
+    #             random_seed=seed)  #do NOT add noise to test set!!!!
+    #         X_target_val, y_target_val = friedman1(
+    #             n_samples=val_size,
+    #             add_noise=False,
+    #             noise_distribution='gaussian',
+    #             n_features=10,
+    #             random_seed=seed + 10)  #do NOT add noise to test set!!!!
+    #         X_target_train, y_target_train = friedman1(
+    #             n_samples=target_instances,
+    #             add_noise=True,
+    #             noise_distribution='gaussian',
+    #             n_features=10,
+    #             random_seed=seed)  #add noise to train set
+    #         for d in d_list:
+    #             X_source_train, y_source_train = friedman1_altered(
+    #                 n_samples=1000,
+    #                 add_noise=True,
+    #                 noise_distribution='gaussian',
+    #                 n_features=10,
+    #                 d=d,
+    #                 shift_seed=seed,
+    #                 random_seed=seed
+    #             )  #also add noise to source (only train here)
+    #             for config in param_grid:
+    #                 v, target_tree_size = config
 
-                    method = 'xgboost'
-                    params = {
-                        'objective':
-                        'reg:squarederror',  # Regression with squared error
-                        'max_depth':
-                        target_tree_size,  # Maximum depth of a tree
-                        'eta': v,  # Learning rate
-                        'eval_metric': 'rmse',  # RMSE as evaluation metric
-                    }
+    #                 method = 'xgboost'
+    #                 params = {
+    #                     'objective':
+    #                     'reg:squarederror',  # Regression with squared error
+    #                     'max_depth':
+    #                     target_tree_size,  # Maximum depth of a tree
+    #                     'eta': v,  # Learning rate
+    #                     'eval_metric': 'rmse',  # RMSE as evaluation metric
+    #                 }
 
-                    bst = train_xgboost(X_target_train,
-                                        y_target_train,
-                                        X_target_val,
-                                        y_target_val,
-                                        boosting_rounds=1000,
-                                        params=params)
-                    preds_val = test_xgboost(X_target_val, bst)
-                    val_rmse = compute_rmse(preds_val, y_target_val)
-                    val_mae = compute_mae(preds_val, y_target_val)
-                    preds = test_xgboost(X_target_test, bst)
-                    rmse = compute_rmse(preds, y_target_test)
-                    mae = compute_mae(preds, y_target_test)
+    #                 bst = train_xgboost(X_target_train,
+    #                                     y_target_train,
+    #                                     X_target_val,
+    #                                     y_target_val,
+    #                                     boosting_rounds=1000,
+    #                                     params=params)
+    #                 preds_val = test_xgboost(X_target_val, bst)
+    #                 val_rmse = compute_rmse(preds_val, y_target_val)
+    #                 val_mae = compute_mae(preds_val, y_target_val)
+    #                 preds = test_xgboost(X_target_test, bst)
+    #                 rmse = compute_rmse(preds, y_target_test)
+    #                 mae = compute_mae(preds, y_target_test)
 
-                    ablation_transfer_normal_normal = pd.DataFrame(columns=[
-                        'seed', 'target_instances', 'd', 'method', 'v',
-                        'target_tree_size', 'val_rmse', 'val_mae', 'rmse',
-                        'mae'
-                    ])
-                    ablation_transfer_normal_normal.loc[len(
-                        ablation_transfer_normal_normal)] = [
-                            seed, target_instances, d, method, v,
-                            target_tree_size, val_rmse, val_mae, rmse, mae
-                        ]
+    #                 ablation_transfer_normal_normal = pd.DataFrame(columns=[
+    #                     'seed', 'target_instances', 'd', 'method', 'v',
+    #                     'target_tree_size', 'val_rmse', 'val_mae', 'rmse',
+    #                     'mae'
+    #                 ])
+    #                 ablation_transfer_normal_normal.loc[len(
+    #                     ablation_transfer_normal_normal)] = [
+    #                         seed, target_instances, d, method, v,
+    #                         target_tree_size, val_rmse, val_mae, rmse, mae
+    #                     ]
 
-                    ablation_file = f'results/xgboost_ablation_friedman.csv'
-                    file_exists = os.path.isfile(ablation_file)
+    #                 ablation_file = f'results/xgboost_ablation_friedman.csv'
+    #                 file_exists = os.path.isfile(ablation_file)
 
-                    ablation_transfer_normal_normal.to_csv(
-                        ablation_file, mode='a', header=not file_exists)
+    #                 ablation_transfer_normal_normal.to_csv(
+    #                     ablation_file, mode='a', header=not file_exists)
 
-                    method = 'xgboost_naive_transfer'
-                    params = {
-                        'objective':
-                        'reg:squarederror',  # Regression with squared error
-                        'max_depth':
-                        target_tree_size,  # Maximum depth of a tree
-                        'eta': v,  # Learning rate
-                        'eval_metric': 'rmse',  # RMSE as evaluation metric
-                    }
-                    X_comb = np.concatenate((X_target_train, X_source_train))
-                    y_comb = np.concatenate((y_target_train, y_source_train))
-                    bst = train_xgboost(X_comb,
-                                        y_comb,
-                                        X_target_val,
-                                        y_target_val,
-                                        boosting_rounds=1000,
-                                        params=params)
-                    preds_val = test_xgboost(X_target_val, bst)
-                    val_rmse = compute_rmse(preds_val, y_target_val)
-                    val_mae = compute_mae(preds_val, y_target_val)
-                    preds = test_xgboost(X_target_test, bst)
-                    rmse = compute_rmse(preds, y_target_test)
-                    mae = compute_mae(preds, y_target_test)
-                    ablation_transfer_normal_normal = pd.DataFrame(columns=[
-                        'seed', 'target_instances', 'd', 'method', 'v',
-                        'target_tree_size', 'val_rmse', 'val_mae', 'rmse',
-                        'mae'
-                    ])
-                    ablation_transfer_normal_normal.loc[len(
-                        ablation_transfer_normal_normal)] = [
-                            seed, target_instances, d, method, v,
-                            target_tree_size, val_rmse, val_mae, rmse, mae
-                        ]
+    #                 method = 'xgboost_naive_transfer'
+    #                 params = {
+    #                     'objective':
+    #                     'reg:squarederror',  # Regression with squared error
+    #                     'max_depth':
+    #                     target_tree_size,  # Maximum depth of a tree
+    #                     'eta': v,  # Learning rate
+    #                     'eval_metric': 'rmse',  # RMSE as evaluation metric
+    #                 }
+    #                 X_comb = np.concatenate((X_target_train, X_source_train))
+    #                 y_comb = np.concatenate((y_target_train, y_source_train))
+    #                 bst = train_xgboost(X_comb,
+    #                                     y_comb,
+    #                                     X_target_val,
+    #                                     y_target_val,
+    #                                     boosting_rounds=1000,
+    #                                     params=params)
+    #                 preds_val = test_xgboost(X_target_val, bst)
+    #                 val_rmse = compute_rmse(preds_val, y_target_val)
+    #                 val_mae = compute_mae(preds_val, y_target_val)
+    #                 preds = test_xgboost(X_target_test, bst)
+    #                 rmse = compute_rmse(preds, y_target_test)
+    #                 mae = compute_mae(preds, y_target_test)
+    #                 ablation_transfer_normal_normal = pd.DataFrame(columns=[
+    #                     'seed', 'target_instances', 'd', 'method', 'v',
+    #                     'target_tree_size', 'val_rmse', 'val_mae', 'rmse',
+    #                     'mae'
+    #                 ])
+    #                 ablation_transfer_normal_normal.loc[len(
+    #                     ablation_transfer_normal_normal)] = [
+    #                         seed, target_instances, d, method, v,
+    #                         target_tree_size, val_rmse, val_mae, rmse, mae
+    #                     ]
 
-                    ablation_file = f'results/xgboost_ablation_friedman.csv'
-                    file_exists = os.path.isfile(ablation_file)
+    #                 ablation_file = f'results/xgboost_ablation_friedman.csv'
+    #                 file_exists = os.path.isfile(ablation_file)
 
-                    ablation_transfer_normal_normal.to_csv(
-                        ablation_file, mode='a', header=not file_exists)
+    #                 ablation_transfer_normal_normal.to_csv(
+    #                     ablation_file, mode='a', header=not file_exists)
 
     #also run mlp finetuning
     ablation_transfer_normal_normal = pd.DataFrame(columns=[
