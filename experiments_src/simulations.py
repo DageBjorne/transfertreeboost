@@ -402,7 +402,7 @@ def train_run(d_idx):
                     ])
                     ablation_transfer_normal_normal.loc[len(
                         ablation_transfer_normal_normal)] = [
-                            seed, target_instances, method, d, v,
+                            seed, target_instances, d, method, v,
                             target_tree_size, val_rmse, val_mae, rmse, mae
                         ]
 
