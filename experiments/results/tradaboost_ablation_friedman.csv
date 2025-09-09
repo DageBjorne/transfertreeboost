@@ -1,0 +1,2 @@
+,seed,d,target_instances,method,n_estimators,lr,tree_size,val_rmse,val_mae,rmse,mae
+0,1,1,100,TradaBoostR2,10,0.1,1,0.9109014897871393,0.7029186234978722,0.9450626388283266,0.7197828880614849
