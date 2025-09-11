@@ -111,5 +111,14 @@ def train_run_trada(d_idx):
                             seed, d, target_instances, method, n_estimators,
                             lr, tree_size, val_rmse, val_mae, rmse, mae
                         ]
+
+                    import os
+
+                    ablation_file = f'results/trada_ablation_friedman.csv'
+                    file_exists = os.path.isfile(ablation_file)
+
                     ablation_transfer_tradaboost_normal_normal.to_csv(
-                        f'results/tradaboost_ablation_friedman.csv')
+                        ablation_file, mode='a', header=not file_exists)
+
+                    #ablation_transfer_tradaboost_normal_normal.to_csv(
+                    #    f'results/tradaboost_ablation_friedman.csv')
