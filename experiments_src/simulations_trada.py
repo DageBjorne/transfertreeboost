@@ -106,6 +106,14 @@ def train_run_trada(d_idx):
                     val_mae = mean_absolute_error(val_preds, y_target_val)
                     rmse = np.sqrt(mean_squared_error(preds, y_target_test))
                     mae = mean_absolute_error(preds, y_target_test)
+
+                    ablation_transfer_tradaboost_normal_normal = pd.DataFrame(
+                        columns=[
+                            'seed', 'd', 'target_instances', 'method',
+                            'n_estimators', 'lr', 'tree_size', 'val_rmse',
+                            'val_mae', 'rmse', 'mae'
+                        ])
+
                     ablation_transfer_tradaboost_normal_normal.loc[len(
                         ablation_transfer_tradaboost_normal_normal)] = [
                             seed, d, target_instances, method, n_estimators,
@@ -120,5 +128,4 @@ def train_run_trada(d_idx):
                     ablation_transfer_tradaboost_normal_normal.to_csv(
                         ablation_file, mode='a', header=not file_exists)
 
-                    #ablation_transfer_tradaboost_normal_normal.to_csv(
-                    #    f'results/tradaboost_ablation_friedman.csv')
+                    #ablation_transfer_tradaboost_normal_normal.to_csv(f'results/tradaboost_ablation_friedman.csv')
