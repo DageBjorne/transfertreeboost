@@ -267,11 +267,15 @@ class LADTransferTreeBoost():
             y_train_target_residuals = y_train_target - F[target_indices]
             y_train_source_residuals = y_train_source - F[source_indices]
 
+            ###I think we should fit trees on signs of residuals###
+            sign_residuals_target = np.sign(y_train_target_residuals)
+            sign_residuals_source = np.sign(y_train_source_residuals)
+
             clf = DecisionTreeRegressor(max_depth=self.target_tree_size, min_samples_leaf=self.min_samples_leaf)
-            clf.fit(x_train_target, y_train_target_residuals)
+            clf.fit(x_train_target, sign_residuals_target)
 
             clfhat = DecisionTreeRegressor(max_depth=self.source_tree_size, min_samples_leaf=self.min_samples_leaf)
-            clfhat.fit(x_train_source, y_train_source_residuals)
+            clfhat.fit(x_train_source, sign_residuals_source)
 
             self.model_tray_clf.append(clf)
             self.model_tray_clfhat.append(clfhat)
