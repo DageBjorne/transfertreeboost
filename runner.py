@@ -1,4 +1,5 @@
 from experiments_src.simulations import train_run
+from experiments_src.tester import train_run_tester
 from experiments_src.simulations_trada import train_run_trada
 import argparse
 
@@ -21,5 +22,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
     if args.v2 == 'sim':
         train_run(args.v1)
+    elif args.v2 == 'rs':
+        train_run_tester(args.v1)
     else:
         train_run_trada(args.v1)
