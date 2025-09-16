@@ -44,6 +44,7 @@ param_grid = list(itertools.product(n_estimators_list, lr_list,
                                     tree_size_list))
 
 
+## starta en screen för varje seed in [0,1,2,3,4] och kör!!
 def train_run_tester_trada(s_idx):
     seed_list = [1, 2, 3, 4, 5]
     seed_list = [seed_list[int(s_idx)]]
