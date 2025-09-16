@@ -1,2 +1,0 @@
-,seed,target_column,target_instances,method,n_estimators,lr,tree_size,val_rmse,val_mae,rmse,mae
-0,2,Volume,570,TradaBoostR2,10,0.1,1,72.7882311407637,53.416156028885744,81.55427934809117,58.17062635415904
