@@ -44,10 +44,12 @@ param_grid = list(itertools.product(n_estimators_list, lr_list,
                                     tree_size_list))
 
 
-## starta en screen för varje seed in [0,1,2,3,4] och kör!!
-def train_run_tester_trada(s_idx):
+## starta en screen för varje seed in [0,1,2,3,4] och en för varje test_size_index i [0,1,2,3,4,5] och kör!!
+def train_run_tester_trada(s_idx, t_idx):
     seed_list = [1, 2, 3, 4, 5]
+    test_size_list = [0.7, 0.75, 0.8, 0.85, 0.9, 0.95]  #0.8or 0.93
     seed_list = [seed_list[int(s_idx)]]
+    test_size_list = [test_size_list[int(t_idx)]]
     for seed in seed_list:
         for test_size in test_size_list:
             for target_column in target_columns:
