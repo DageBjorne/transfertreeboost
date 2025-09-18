@@ -123,7 +123,7 @@ def train_run_tester_trada(s_idx, t_idx):
                         ])
                     ablation_transfer_tradaboost_normal_normal.loc[len(
                         ablation_transfer_tradaboost_normal_normal)] = [
-                            seed, target_column, train_size, method,
+                            seed, target_column, train_size_, method,
                             n_estimators, lr, tree_size, val_rmse, val_mae,
                             rmse, mae
                         ]

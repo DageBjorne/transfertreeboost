@@ -125,7 +125,7 @@ def train_run_tester(s_idx):
                         'm_0', 'val_rmse', 'val_mae', 'rmse', 'mae'
                     ])
                     ablation_transfer_real.loc[len(ablation_transfer_real)] = [
-                        seed, target_column, train_size, method, v,
+                        seed, target_column, train_size_, method, v,
                         source_tree_size, target_tree_size, k, m_0, val_rmse,
                         val_mae, rmse, mae
                     ]
@@ -231,7 +231,7 @@ def train_run_tester(s_idx):
                                 ])
                                 ablation_transfer_real.loc[len(
                                     ablation_transfer_real)] = [
-                                        seed, target_column, train_size,
+                                        seed, target_column, train_size_,
                                         method, base_lr, finetuning_lr,
                                         dropout_rate, batch_norm, val_rmse,
                                         val_mae, rmse, mae
