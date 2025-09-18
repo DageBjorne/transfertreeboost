@@ -76,8 +76,8 @@ def train_run_tester_trada(s_idx, t_idx):
                 data_train, data_val = train_test_split(data_temp,
                                                         test_size=0.333,
                                                         random_state=seed)
-                train_size = int(len(data_train) * train_size)
-                data_train = data_train[0:train_size]
+                train_size_ = int(len(data_train) * train_size)
+                data_train = data_train[0:train_size_]
 
                 #"General" base dataset (to use for transfer)
                 X_source_train = np.array(data_sweden[predictor_columns])
