@@ -44,36 +44,40 @@ param_grid = list(itertools.product(n_estimators_list, lr_list,
                                     tree_size_list))
 
 
-## starta en screen för varje seed in [0,1,2,3,4] och en för varje test_size_index i [0,1,2,3,4,5] och kör!!
+## starta en screen för varje seed in [0,1,2,3,4] och en för varje test_size_index i [0,1,2,3,4,5,6,7,8,9] och kör!!
 def train_run_tester_trada(s_idx, t_idx):
     seed_list = [1, 2, 3, 4, 5]
-    test_size_list = [0.7, 0.75, 0.8, 0.85, 0.9, 0.95]  #0.8or 0.93
+    train_size_list = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9,
+                       1.0]  #0.8or 0.93
     seed_list = [seed_list[int(s_idx)]]
-    test_size_list = [test_size_list[int(t_idx)]]
+    train_size_list = [train_size_list[int(t_idx)]]
     for seed in seed_list:
-        for test_size in test_size_list:
+        for train_size in train_size_list:
             for target_column in target_columns:
 
                 #data from Svedala
-                data_sweden = pd.read_csv(r'datasets/rs_sweden.csv',
+                data_sweden = pd.read_csv(r'../datasets/rs_sweden.csv',
                                           index_col=[0])
+                data_sweden = data_sweden[data_sweden['area_code'] == 4]
+                print(len(data_sweden))
 
                 #evaluate and rain on latvia instead (keep naming for simplicity)
                 #data from latvia target
-                data_latvia = pd.read_csv(r'datasets/rs_lettland.csv',
+                data_latvia = pd.read_csv(r'../datasets/rs_lettland.csv',
                                           index_col=[0])
-                train_size = int((1 - test_size) * len(data_latvia))
                 data_latvia = data_latvia.rename(columns={
                     'H_AVERAGE': 'Hgv',
                     'D_AVERAGE': 'Dgv',
                     'VOLUME': 'Volume'
                 })
-                data_train, data_temp = train_test_split(data_latvia,
-                                                         test_size=test_size,
-                                                         random_state=seed)
-                data_val, data_test = train_test_split(data_temp,
-                                                       test_size=0.5,
-                                                       random_state=seed)
+                data_temp, data_test = train_test_split(data_latvia,
+                                                        test_size=0.25,
+                                                        random_state=seed)
+                data_train, data_val = train_test_split(data_temp,
+                                                        test_size=0.333,
+                                                        random_state=seed)
+                train_size = int(len(data_train) * train_size)
+                data_train = data_train[0:train_size]
 
                 #"General" base dataset (to use for transfer)
                 X_source_train = np.array(data_sweden[predictor_columns])
