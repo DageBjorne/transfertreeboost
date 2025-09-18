@@ -56,14 +56,14 @@ def train_run_tester_trada(s_idx, t_idx):
             for target_column in target_columns:
 
                 #data from Svedala
-                data_sweden = pd.read_csv(r'../datasets/rs_sweden.csv',
+                data_sweden = pd.read_csv(r'datasets/rs_sweden.csv',
                                           index_col=[0])
                 data_sweden = data_sweden[data_sweden['area_code'] == 4]
                 print(len(data_sweden))
 
                 #evaluate and rain on latvia instead (keep naming for simplicity)
                 #data from latvia target
-                data_latvia = pd.read_csv(r'../datasets/rs_lettland.csv',
+                data_latvia = pd.read_csv(r'datasets/rs_lettland.csv',
                                           index_col=[0])
                 data_latvia = data_latvia.rename(columns={
                     'H_AVERAGE': 'Hgv',
@@ -127,7 +127,7 @@ def train_run_tester_trada(s_idx, t_idx):
                             n_estimators, lr, tree_size, val_rmse, val_mae,
                             rmse, mae
                         ]
-                    ablation_file = f'results/tradaboost_ablation_rs.csv'
+                    ablation_file = f'results/tradaboost_ablation_rs_norrland.csv'
                     file_exists = os.path.isfile(ablation_file)
                     ablation_transfer_tradaboost_normal_normal.to_csv(
                         ablation_file, mode='a', header=not file_exists)
