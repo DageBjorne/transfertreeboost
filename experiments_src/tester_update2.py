@@ -151,7 +151,7 @@ def train_run_tester(s_idx):
                                 source_tree_size, target_tree_size, k, m_0,
                                 val_rmse, val_mae, rmse, mae
                             ]
-                        ablation_file = f'results/LSTransferTreeBoost_ablation_rs_norrland_{d}.csv'
+                        ablation_file = f'results/LSTransferTreeBoost_ablation_rs_{d}.csv'
                         file_exists = os.path.isfile(ablation_file)
                         ablation_transfer_real.to_csv(ablation_file,
                                                       mode='a',
