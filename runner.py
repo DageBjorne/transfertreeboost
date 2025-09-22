@@ -1,5 +1,5 @@
 from experiments_src.simulations import train_run
-from experiments_src.tester_update import train_run_tester
+from experiments_src.tester_update2 import train_run_tester
 from experiments_src.simulations_trada import train_run_trada
 import argparse
 
