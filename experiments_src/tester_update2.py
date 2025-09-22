@@ -79,8 +79,7 @@ def train_run_tester(s_idx):
                     data_train, data_val = train_test_split(data_temp,
                                                             test_size=0.333,
                                                             random_state=seed)
-                    train_size_ = int(len_of_smallest_regional_dataset *
-                                      train_size)
+                    train_size_ = int(len(data_train)*train_size)
                     data_train = data_train[0:train_size_]
 
                     #"General" base dataset (to use for transfer)
