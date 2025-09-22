@@ -1,0 +1,3 @@
+,seed,target_column,target_instances,method,v,source_tree_size,target_tree_size,k,m_0,val_rmse,val_mae,rmse,mae
+0,1,Dgv,753,LSTransferTreeBoost,0.02,2,2,0.01,0.9,7.258772642919634,4.803114559024857,5.863616853197343,4.0506962701501825
+1,1,Dgv,903,LSTransferTreeBoost,0.02,1,1,0.01,0.9,7.190945311425446,4.813718456030402,5.892619647022364,4.123429551949824
