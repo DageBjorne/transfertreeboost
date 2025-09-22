@@ -19,6 +19,7 @@ def train_run_tester(s_idx):
     train_size_list = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
     target_columns = ['Dgv']
     seed_list = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+    seed_list = [seed_list[int(s_idx)]]
     d_list = [1, 2, 3, 4]
 
     len_of_smallest_regional_dataset = 1506  # detta är för att få exakt samma train sizes på alla 4 delmängder
@@ -38,17 +39,18 @@ def train_run_tester(s_idx):
     ])
     #ablation_transfer_real = pd.read_csv(f'results/LSTransferTreeBoost_ablation_rs_norrland.csv', index_col = [0])
 
-    v_list = [0.02]
+    v_list = [0.05, 0.1]
     source_tree_size_list = [1, 2]
     target_tree_size_list = [1, 2]
-    k_list = [0.01]
-    m_0_list = [0.9]
+    k_list = [0.01, 0.05]
+    m_0_list = [0.5, 0.9]
 
     # --- Step 2: Create full parameter grid ---
     param_grid = list(
         itertools.product(v_list, source_tree_size_list, target_tree_size_list,
                           k_list, m_0_list))
-
+    #data_sweden = pd.read_csv(r'datasets/rs_sweden.csv', index_col=[0])
+    #data_latvia = pd.read_csv(r'datasets/rs_lettland.csv', index_col=[0])
     # --- Step 3: Sample random combinations ---
     #sampled_configs = random.sample(param_grid, n_samples)
     for d in d_list:
@@ -131,14 +133,6 @@ def train_run_tester(s_idx):
                                                  y_target_val,
                                                  metric='mae')
 
-                        ablation_transfer_real.loc[len(
-                            ablation_transfer_real)] = [
-                                seed, target_column, train_size_, method, v,
-                                source_tree_size, target_tree_size, k, m_0,
-                                val_rmse, val_mae, rmse, mae
-                            ]
-                        ablation_transfer_real.to_csv(
-                            f'results/LSTransferTreeBoost_ablation_rs_{d}.csv')
                         ablation_transfer_real = pd.DataFrame(columns=[
                             'seed', 'target_column', 'target_instances',
                             'method', 'v', 'source_tree_size',
