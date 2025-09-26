@@ -4,7 +4,7 @@ import itertools
 
 #Global configs
 
-train_size_list = [0.2, 0.6, 1.0]
+train_size_list = [0.1, 0.2, 0.6, 1.0]
 target_columns = ['Hgv']
 seed_list = [1, 2, 3, 4, 5]
 d_list = [1, 4]
