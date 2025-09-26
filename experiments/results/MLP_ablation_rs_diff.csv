@@ -1,2 +1,0 @@
-,seed,target_column,target_instances,method,base_lr,fine_tuning_lr,dropout_rate,batch_norm,val_rmse,val_mae,rmse,mae
-0,7,Dgv,190,MLP,0.0005,0.0001,0.0,True,9.462126,6.5637016,9.523104,6.7655087
