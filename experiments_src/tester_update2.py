@@ -34,7 +34,7 @@ def train_run_tester(s_idx):
                                               index_col=[0])
                     data_sweden = data_sweden[data_sweden['area_code'] == d]
                     print(len(data_sweden))
-
+                    data_sweden = data_sweden.sample(1000, random_state=seed)
                     #evaluate and rain on latvia instead (keep naming for simplicity)
                     #data from latvia target
                     data_latvia = pd.read_csv(r'datasets/rs_lettland.csv',
@@ -55,6 +55,7 @@ def train_run_tester(s_idx):
 
                     #"General" base dataset (to use for transfer)
                     X_source_train = np.array(data_sweden[c.predictor_columns])
+                    #y_source_train = np.array(data_sweden[target_column])
                     y_source_train = np.array(data_sweden[target_column])
 
                     #Specific train and test set
@@ -115,7 +116,7 @@ def train_run_tester(s_idx):
                                 source_tree_size, target_tree_size, k, m_0,
                                 val_rmse, val_mae, rmse, mae
                             ]
-                        ablation_file = f'results/LSTransferTreeBoost_ablation_HGV_rs_{d}.csv'
+                        ablation_file = f'results/LSTransferTreeBoost_ablation_rs_{d}_250927.csv'
                         file_exists = os.path.isfile(ablation_file)
                         ablation_transfer_real.to_csv(ablation_file,
                                                       mode='a',
