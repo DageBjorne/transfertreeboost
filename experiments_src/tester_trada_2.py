@@ -19,7 +19,7 @@ import warnings
 
 warnings.filterwarnings("ignore")
 
-target_columns = ['Hgv', 'Dgv']
+target_columns = ['Hgv']
 #test_size_list = [0.7, 0.75, 0.8, 0.85, 0.9, 0.95]  #0.8or 0.93
 
 predictor_columns = c.predictor_columns
