@@ -1,6 +1,6 @@
 from experiments_src.simulations import train_run
 from experiments_src.tester_update2 import train_run_tester
-from experiments_src.simulations_trada import train_run_trada
+from experiments_src.tester_trada_2 import train_run_tester_trada
 import argparse
 
 #v1_list = [0.005, 0.007, 0.01, 0.03, 0.07]
@@ -25,4 +25,4 @@ if __name__ == "__main__":
     elif args.v2 == 'rs':
         train_run_tester(args.v1)
     else:
-        train_run_trada(args.v1)
+        train_run_tester_trada(args.v1)
