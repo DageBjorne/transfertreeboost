@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 from sklearn.model_selection import train_test_split
-
+import experiments.config as c
 from adapt.instance_based import TrAdaBoostR2, TwoStageTrAdaBoostR2
 from sklearn.metrics import mean_squared_error, mean_absolute_error
 
@@ -19,15 +19,10 @@ import warnings
 
 warnings.filterwarnings("ignore")
 
-target_columns = ['Volume', 'Dgv']
+target_columns = ['Hgv', 'Dgv']
 test_size_list = [0.7, 0.75, 0.8, 0.85, 0.9, 0.95]  #0.8or 0.93
 
-predictor_columns = [
-    'pzabovezmean', 'pzabove2', 'zq5', 'zq10', 'zq15', 'zq20', 'zq25', 'zq30',
-    'zq35', 'zq40', 'zq45', 'zq50', 'zq55', 'zq60', 'zq65', 'zq70', 'zq75',
-    'zq80', 'zq85', 'zq90', 'zq95', 'zpcum1', 'zpcum2', 'zpcum3', 'zpcum4',
-    'zpcum5', 'zpcum6', 'zpcum7', 'zpcum8', 'zpcum9'
-]
+predictor_columns = c.predictor_columns
 
 #ablation study for TradaBoostR2, Gaussian errors, with gaussian source domain errors
 ablation_transfer_tradaboost_normal_normal = pd.DataFrame(columns=[
