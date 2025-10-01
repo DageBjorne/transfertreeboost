@@ -30,26 +30,26 @@ ablation_transfer_tradaboost_normal_normal = pd.DataFrame(columns=[
     'lr', 'tree_size', 'val_rmse', 'val_mae', 'rmse', 'mae'
 ])
 
-n_estimators_list = [10, 20, 30, 40, 50]
-lr_list = [0.1, 0.5, 1.0]
-tree_size_list = [1, 2, 3, 4, 5]
+n_estimators_list = [10, 20, 30]  #, 40, 50]
+lr_list = [0.1, 0.5]  #, 1.0]
+tree_size_list = [1, 2]  #, 3] #, 4, 5]
 
 # --- Step 2: Create full parameter grid ---
 param_grid = list(itertools.product(n_estimators_list, lr_list,
-                                    tree_size_list))
+                                    tree_size_list))  # 18
 
 
 ## starta en screen för varje seed in [0,1,2,3,4] och en för varje test_size_index i [0,1,2,3,4,5,6,7,8,9] och kör!!
 def train_run_tester_trada(s_idx, t_idx):
-    seed_list = c.seed_list  #[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-    train_size_list = c.train_size_list
-    train_size_list = [train_size_list[int(t_idx)]]
-    for d in c.d_list:
-        seed_list = [seed_list[int(s_idx)]]
-        for seed in seed_list:
-            for train_size in c.train_size_list:
+    #seed_list = c.seed_list  #[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+    seed_list = [c.seed_list[int(s_idx)]]
+    #train_size_list = c.train_size_list
+    train_size_list = [c.train_size_list[int(t_idx)]]
 
-                for target_column in target_columns:
+    for d in c.d_list:  #4
+        for seed in seed_list:  # 3
+            for train_size in train_size_list:  # 10
+                for target_column in c.target_columns:  # 1
 
                     #data from Svedala
                     #data from Svedala
@@ -94,7 +94,7 @@ def train_run_tester_trada(s_idx, t_idx):
                     #print(len(X_target_train), len(X_target_val),
                     #      len(X_target_test))
                     for config in param_grid:
-                        n_estimators, lr, tree_size = config
+                        n_estimators, lr, tree_size = config  # 75 now 18
 
                         method = f'TradaBoostR2'
                         base_estimator = LinearTreeRegressor(
@@ -126,7 +126,7 @@ def train_run_tester_trada(s_idx, t_idx):
                                 n_estimators, lr, tree_size, val_rmse, val_mae,
                                 rmse, mae
                             ]
-                        ablation_file = f'results/tradaboost_ablation_rs_{d}__250930.csv'
+                        ablation_file = f'results/tradaboost_ablation_rs_{d}_251001.csv'
                         file_exists = os.path.isfile(ablation_file)
                         ablation_transfer_tradaboost_normal_normal.to_csv(
                             ablation_file, mode='a', header=not file_exists)
