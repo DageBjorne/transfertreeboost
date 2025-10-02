@@ -79,8 +79,8 @@ def train_run_tester_trada(s_idx, t_idx):
                     #"General" base dataset (to use for transfer)
                     X_source_train = np.array(data_sweden[c.predictor_columns])
                     #y_source_train = np.array(data_sweden[target_column])
-                    y_source_train = np.array(data_sweden[target_column])
-                    #y_source_train = np.array(data_sweden['Dgv'])
+                    #y_source_train = np.array(data_sweden[target_column])
+                    y_source_train = np.array(data_sweden['Dgv'])
 
                     #Specific train and test set
                     X_target_train = np.array(data_train[c.predictor_columns])
@@ -127,7 +127,7 @@ def train_run_tester_trada(s_idx, t_idx):
                                 n_estimators, lr, tree_size, val_rmse, val_mae,
                                 rmse, mae
                             ]
-                        ablation_file = f'results/tradaboost_ablation_rs_{d}_251001.csv'
+                        ablation_file = f'results/tradaboost_ablation_rs_{d}_251001_mixed.csv'
                         file_exists = os.path.isfile(ablation_file)
                         ablation_transfer_tradaboost_normal_normal.to_csv(
                             ablation_file, mode='a', header=not file_exists)
