@@ -267,7 +267,7 @@ class LADTransferTreeBoost():
             y_train_target_residuals = y_train_target - F[target_indices]
             y_train_source_residuals = y_train_source - F[source_indices]
 
-            ###I think we should fit trees on signs of residuals###
+            ###fit trees on signs of LS residuals, these are the LAD residuals###
             sign_residuals_target = np.sign(y_train_target_residuals)
             sign_residuals_source = np.sign(y_train_source_residuals)
 
@@ -356,7 +356,7 @@ class LADTransferTreeBoost():
 
         return self.leaf_gammas_tray, self.leaf_gammashats_tray, self.model_tray_clf, self.model_tray_clfhat, self.alpha_tray
 
-#Huber Loss, should stay the same
+#Huber Loss, only at initial stage
 class MTransferTreeBoost():
     def __init__(self, v=0.1, epochs=100, target_tree_size=2, source_tree_size=2,
                  k=0.2, m_0=10, min_samples_leaf=25, quantile = 0.9):

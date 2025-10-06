@@ -4,7 +4,7 @@ import cvxpy as cp
 
 #leaves returned by sklearn are not incremental by one. 
 # They can be for instance 1,3,4,7. This mapping should return (in this case) 0,1,2,3
-#this will be needed (I think) to create the matrices in a better way. 
+#this will be needed to create the matrices in a better way. 
 # We also need it to map test datapoints to correct leaves
 def map_leaves_to_number(leaves):
     unique_leaves = sorted(np.unique(leaves))
@@ -29,6 +29,7 @@ def compute_mae(predictions, targets):
     """Compute Root Mean Squared Error (RMSE)."""
     return np.mean(np.abs(predictions - targets))
 
+#scheduler for alpha
 def exponential_decay(m, k = 1, m_0 = 0.5):
     return np.exp(-m*k) * m_0
 
@@ -87,7 +88,7 @@ def find_gamma_gammahat(unique_leaves_clf, indexed_leaves_clf,
     leaf_gammahat = gamma_vector[len(unique_leaves_clf):]
     return leaf_gamma, leaf_gammahat
 
-#In here will be the function for computing optimal coefficients for LAD
+# computing optimal coefficients for LAD with scipy (default)
 def find_gamma_gammahat_LAD(unique_leaves_clf, indexed_leaves_clf, 
                              unique_leaves_clfhat, indexed_leaves_clfhat,
                              y_train_target_residuals):
@@ -148,7 +149,7 @@ def find_lad_ls_indices_delta(y_train_target_residuals, quantile):
     return lad_indices, ls_indices, delta
 
 
-#Huber Loss (under development)
+#Huber Loss (under development and at initial state)
 def find_gamma_gammahat_Huber(unique_leaves_clf, indexed_leaves_clf, 
                               unique_leaves_clfhat, indexed_leaves_clfhat,
                               y_train_target_residuals, lad_indices, ls_indices, delta):
@@ -206,7 +207,7 @@ def find_gamma_gammahat_Huber(unique_leaves_clf, indexed_leaves_clf,
 
     return leaf_gamma, leaf_gammahat
 
-#In here will be the function for computing optimal coefficients for LAD
+#find optimal coefficinets for LAD with cvxpy package
 def find_gamma_gammahat_LAD_cvxpy(unique_leaves_clf, indexed_leaves_clf, 
                              unique_leaves_clfhat, indexed_leaves_clfhat,
                              y_train_target_residuals):

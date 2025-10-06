@@ -59,20 +59,6 @@ def test_xgboost(data_test, bst):
     preds = bst.predict(dtest)
     return preds
 
-#TradaBoostR2 (currently unused)
-def train_twostagetradaboostr2(X_source_train, y_source_train, X_target_train, y_target_train, n_estimators=100, 
-                       tree_size_depth=2, lr=1.0):
-    model = TwoStageTrAdaBoostR2(DecisionTreeRegressor(max_depth=tree_size_depth, min_samples_leaf=25), 
-                         Xt=X_target_train, yt=y_target_train, n_estimators=n_estimators, lr=lr, verbose=0)
-
-    model.fit(X_source_train, y_source_train)
-
-    return model
-
-def predict_twostagetradaboostr2(X_target_test, model):
-    preds = model.predict(X_target_test)
-    return preds
-
 #MLP
 import torch
 
