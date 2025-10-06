@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from utils import *
 
 class LSTransferTreeBoost():
-    def __init__(self, v=0.1, epochs=100, target_tree_size=2, source_tree_size=2, k=0.2, m_0=10, min_samples_leaf=25):
+    def __init__(self, v=0.1, epochs=100, target_tree_size=2, source_tree_size=2, k=0.05, m_0=0.9, min_samples_leaf=25):
         self.v = v
         self.epochs = epochs
         self.target_tree_size = target_tree_size
@@ -179,7 +179,7 @@ class LSTransferTreeBoost():
 
 class LADTransferTreeBoost():
     def __init__(self, v=0.1, epochs=100, target_tree_size=2, source_tree_size=2,
-                 k=0.2, m_0=10, min_samples_leaf=25, optimizer_package = 'scipy'):
+                 k=0.05, m_0=0.9, min_samples_leaf=25, optimizer_package = 'scipy'):
         self.v = v
         self.epochs = epochs
         self.target_tree_size = target_tree_size
