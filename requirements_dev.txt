@@ -1,0 +1,8 @@
+adapt==0.4.4
+pandas==2.3.0
+ipykernel==6.29.5
+linear-tree==0.3.5
+seaborn==0.13.2
+
+torch==2.8.0
+xgboost==3.0.2

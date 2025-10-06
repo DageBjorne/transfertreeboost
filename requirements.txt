@@ -1,11 +1,5 @@
 numpy==2.2.5
-scikit-learn==1.6.1
-matplotlib==3.10.1
-scipy==1.15.0
 cvxpy==1.6.6
-
-## Lägg till dessa Dag
-# pandas
-# adapt
-# xgboost
-# torch
+matplotlib==3.10.1
+scikit-learn==1.6.1
+scipy==1.15.0
