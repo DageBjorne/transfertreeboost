@@ -11,7 +11,7 @@ To test it, create a virtual environment and install the requirements.
 Simple examples follow, with default parameters (same default parameters for LAD as LS):
 
 ```
-from core import LSTransferTreeBoost
+from core import LSTransferTreeBoost (LADTransferTreeBoost)
 #instantiate model
 model = LSTransferTreeBoost(v=0.1, epochs=100, target_tree_size=2,
                             source_tree_size=2, k=0.05, m_0=0.9, min_samples_leaf=25)
@@ -19,7 +19,7 @@ model = LSTransferTreeBoost(v=0.1, epochs=100, target_tree_size=2,
 ```
 **Parameters**:
 ```
-v: learning rate, or shrinkage parameter. Shrinks contribution from each base learner to rpevent overfitting.
+v: learning rate, or shrinkage parameter. Shrinks contribution from each base learner to prevent overfitting.
 
 epochs: how many iterations to use.
 
