@@ -84,3 +84,9 @@ import joblib
 joblib.dump(model, 'model.joblib') #for saving fitted model
 model = joblib.load('model.joblib') #to load saved model
 ```
+
+## Run experiments
+To replicate our experiments, run the notebooks in the following folders:
+
+- `friedman_experiments`: experiments for the friedman #1 dataset. All results and visualizations are saved, but all of it can be reproduced following the provided notebooks.
+- `forest_experiments`: experiments for the forest variable prediction task. Unfortunately, the datasets are restricted due to confidentiality, so the experiments cannot be reproduced. However, we have saved the results, so that the visualizations can be reproduced. Moreover, the training logic is provided. We decided to include this to be as transparent as we possible can. 
