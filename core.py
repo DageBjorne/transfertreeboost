@@ -171,9 +171,6 @@ class LSTransferTreeBoost():
             plt.ylabel('MSE')
             plt.show()
 
-            plt.plot(x, np.array(self.alpha_tray))
-            plt.show()
-
 
         return self.leaf_gammas_tray, self.leaf_gammashats_tray, self.model_tray_clf, self.model_tray_clfhat, self.alpha_tray
 
@@ -349,9 +346,6 @@ class LADTransferTreeBoost():
             plt.title('Loss over epochs')
             plt.xlabel('epoch')
             plt.ylabel('MAE')
-            plt.show()
-
-            plt.plot(x, np.array(self.alpha_tray))
             plt.show()
 
         return self.leaf_gammas_tray, self.leaf_gammashats_tray, self.model_tray_clf, self.model_tray_clfhat, self.alpha_tray
