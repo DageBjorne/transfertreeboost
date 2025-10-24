@@ -353,7 +353,7 @@ class LADTransferTreeBoost():
 #Huber Loss, only at initial stage
 class MTransferTreeBoost():
     def __init__(self, v=0.1, epochs=100, target_tree_size=2, source_tree_size=2,
-                 k=0.2, m_0=10, min_samples_leaf=25, quantile = 0.9):
+                 k=0.05, m_0=0.9, min_samples_leaf=25, quantile = 0.9):
         self.v = v
         self.epochs = epochs
         self.target_tree_size = target_tree_size
@@ -438,8 +438,13 @@ class MTransferTreeBoost():
         source_indices = np.arange(len(y_train_target), len(y_train_target) + len(y_train_source))
 
         for m in range(self.epochs):
+            # find ls-lad indices
             y_train_target_residuals = y_train_target - F[target_indices]
             y_train_source_residuals = y_train_source - F[source_indices]
+            lad_indices, ls_indices, delta = find_lad_ls_indices_delta(y_train_target_residuals, self.quantile)
+            lad_indices_source, ls_indices_source, delta_source = find_lad_ls_indices_delta(y_train_source_residuals, self.quantile)
+            y_train_target_residuals[lad_indices] = delta * np.sign(y_train_target[lad_indices] - F[target_indices][lad_indices])
+            y_train_source_residuals[lad_indices_source] = delta_source * np.sign(y_train_source[lad_indices_source] - F[source_indices][lad_indices_source])
 
             clf = DecisionTreeRegressor(max_depth=self.target_tree_size, min_samples_leaf=self.min_samples_leaf)
             clf.fit(x_train_target, y_train_target_residuals)
@@ -462,7 +467,6 @@ class MTransferTreeBoost():
             indexed_leaves_clf = map_leaves_to_number(all_leaves_clf)[:len(leaves_clf_target)]
             indexed_leaves_clfhat = map_leaves_to_number(all_leaves_clfhat)[:len(leaves_clfhat_target)]
 
-            lad_indices, ls_indices, delta = find_lad_ls_indices_delta(y_train_target_residuals, self.quantile)
             leaf_gamma, leaf_gammahat = find_gamma_gammahat_Huber(np.unique(all_leaves_clf), indexed_leaves_clf,
                 np.unique(all_leaves_clfhat), indexed_leaves_clfhat,
                 y_train_target_residuals,
