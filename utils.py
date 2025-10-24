@@ -250,7 +250,7 @@ def find_gamma_gammahat_LAD_cvxpy(unique_leaves_clf, indexed_leaves_clf,
     constraints = [A @ x <= b_ub]
 
     prob = cp.Problem(objective, constraints)
-    prob.solve()
+    prob.solve(solver=cp.COPT)
     
     gamma_vector = x.value[len(indexed_leaves_clf):]
     leaf_gamma = gamma_vector[:len(unique_leaves_clf)]

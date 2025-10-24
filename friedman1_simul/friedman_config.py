@@ -18,9 +18,9 @@ source_tree_size_list = [2]
 target_tree_size_list = [2]
 k_list = [0.05]
 m_0_list = [0.9]
-epoch_list = [50, 100, 150, 200, 250]
+epoch_list = [100]
 
 # Create full parameter grid ---
 param_grid_LSTransferTreeBoost = list(
     itertools.product(v_list, source_tree_size_list, target_tree_size_list,
-                      k_list, m_0_list))
+                      k_list, m_0_list, epoch_list))
