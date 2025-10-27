@@ -186,8 +186,8 @@ def find_gamma_gammahat_Huber(unique_leaves_clf, indexed_leaves_clf,
         A2[i, index + len(unique_leaves_clf)] = 1
     A = -np.concatenate((A1, A2), axis=1)
     A[ls_indices, :] = 0
-    print(np.shape(A))
-    print(np.sum(A))
+    #print(np.shape(A))
+    #print(np.sum(A))
 
     # Constraint bounds
     b_ub = -y_train_target_residuals.copy()

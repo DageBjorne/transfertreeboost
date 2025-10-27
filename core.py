@@ -85,7 +85,8 @@ class LSTransferTreeBoost():
             show_curves=False,
             val_x=None,
             val_y=None,
-            early_stopping_rounds=5):
+            early_stopping_rounds=5,
+            eval_metric='rmse'):
         all_X = np.concatenate((x_train_target, x_train_source))
         self.initial_guess = np.mean(y_train_target)
         F = np.full(all_X.shape[0], self.initial_guess)
@@ -179,11 +180,22 @@ class LSTransferTreeBoost():
                   index] += self.v * leaf_gammahat[index] * alpha
 
             if show_curves:
-                losses.append(compute_mse(F[target_indices], y_train_target))
+                if eval_metric == 'rmse':
+                    losses.append(compute_rmse(F[target_indices], y_train_target))
+                elif eval_metric == 'mse':
+                    losses.append(compute_mse(F[target_indices], y_train_target))
+                elif eval_metric == 'mae':
+                    losses.append(compute_mae(F[target_indices], y_train_target))
+
 
             if val_x is not None and val_y is not None:
-                val_mse = self.evaluate(val_x, val_y, metric='mse')
-                val_losses.append(val_mse)
+                if eval_metric == 'rmse':
+                    val_loss = self.evaluate(val_x, val_y, metric='rmse')
+                elif eval_metric == 'mse':
+                   val_loss = self.evaluate(val_x, val_y, metric='mse') 
+                elif eval_metric == 'mae':
+                    val_loss = self.evaluate(val_x, val_y, metric='mae')
+                val_losses.append(val_loss)
                 es = early_stopping(early_stopping_rounds,
                                     val_losses,
                                     tol=1e-6)
@@ -198,7 +210,7 @@ class LSTransferTreeBoost():
                 plt.legend(['train_loss', 'val_loss'])
             plt.title('Loss over epochs')
             plt.xlabel('epoch')
-            plt.ylabel('MSE')
+            plt.ylabel(f'{eval_metric}')
             plt.show()
 
         return self.leaf_gammas_tray, self.leaf_gammashats_tray, self.model_tray_clf, self.model_tray_clfhat, self.alpha_tray
@@ -288,7 +300,8 @@ class LADTransferTreeBoost():
             show_curves=False,
             val_x=None,
             val_y=None,
-            early_stopping_rounds=5):
+            early_stopping_rounds=5,
+            eval_metric='rmse'):
         all_X = np.concatenate((x_train_target, x_train_source))
         self.initial_guess = np.median(y_train_target)
         F = np.full(all_X.shape[0], self.initial_guess)
@@ -390,15 +403,25 @@ class LADTransferTreeBoost():
                   index] += self.v * leaf_gammahat[index] * alpha
 
             if show_curves:
-                losses.append(compute_mse(F[target_indices], y_train_target))
+                if eval_metric == 'rmse':
+                    losses.append(compute_rmse(F[target_indices], y_train_target))
+                elif eval_metric == 'mse':
+                    losses.append(compute_mse(F[target_indices], y_train_target))
+                elif eval_metric == 'mae':
+                    losses.append(compute_mae(F[target_indices], y_train_target))
+
 
             if val_x is not None and val_y is not None:
-                val_lad = self.evaluate(val_x, val_y, metric='mse')
-                val_losses.append(val_lad)
+                if eval_metric == 'rmse':
+                    val_loss = self.evaluate(val_x, val_y, metric='rmse')
+                elif eval_metric == 'mse':
+                   val_loss = self.evaluate(val_x, val_y, metric='mse') 
+                elif eval_metric == 'mae':
+                    val_loss = self.evaluate(val_x, val_y, metric='mae')
+                val_losses.append(val_loss)
                 es = early_stopping(early_stopping_rounds,
                                     val_losses,
                                     tol=1e-6)
-
                 if es:
                     break
 
@@ -408,10 +431,9 @@ class LADTransferTreeBoost():
             if val_x is not None and val_y is not None:
                 plt.plot(x, np.array(val_losses))
                 plt.legend(['train_loss', 'val_loss'])
-
             plt.title('Loss over epochs')
             plt.xlabel('epoch')
-            plt.ylabel('MAE')
+            plt.ylabel(f'{eval_metric}')
             plt.show()
 
         return self.leaf_gammas_tray, self.leaf_gammashats_tray, self.model_tray_clf, self.model_tray_clfhat, self.alpha_tray
@@ -502,7 +524,8 @@ class MTransferTreeBoost():
             show_curves=False,
             val_x=None,
             val_y=None,
-            early_stopping_rounds=5):
+            early_stopping_rounds=5,
+            eval_metric='rmse'):
         all_X = np.concatenate((x_train_target, x_train_source))
         self.initial_guess = np.median(y_train_target)
         F = np.full(all_X.shape[0], self.initial_guess)
@@ -601,16 +624,25 @@ class MTransferTreeBoost():
                   index] += self.v * leaf_gammahat[index] * alpha
 
             if show_curves:
-                losses.append(compute_mse(F[target_indices], y_train_target))
+                if eval_metric == 'rmse':
+                    losses.append(compute_rmse(F[target_indices], y_train_target))
+                elif eval_metric == 'mse':
+                    losses.append(compute_mse(F[target_indices], y_train_target))
+                elif eval_metric == 'mae':
+                    losses.append(compute_mae(F[target_indices], y_train_target))
+
 
             if val_x is not None and val_y is not None:
-                val_preds = self.predict(val_x)
-                val_lad = compute_mse(val_preds, val_y)
-                val_losses.append(val_lad)
+                if eval_metric == 'rmse':
+                    val_loss = self.evaluate(val_x, val_y, metric='rmse')
+                elif eval_metric == 'mse':
+                   val_loss = self.evaluate(val_x, val_y, metric='mse') 
+                elif eval_metric == 'mae':
+                    val_loss = self.evaluate(val_x, val_y, metric='mae')
+                val_losses.append(val_loss)
                 es = early_stopping(early_stopping_rounds,
                                     val_losses,
                                     tol=1e-6)
-
                 if es:
                     break
 
@@ -620,13 +652,9 @@ class MTransferTreeBoost():
             if val_x is not None and val_y is not None:
                 plt.plot(x, np.array(val_losses))
                 plt.legend(['train_loss', 'val_loss'])
-
             plt.title('Loss over epochs')
             plt.xlabel('epoch')
-            plt.ylabel('Huber loss (MSE)')
-            plt.savefig(f'foo.png')
-            plt.legend(['LS', 'LAD', 'Huber'])
-            plt.close()
+            plt.ylabel(f'{eval_metric}')
             plt.show()
 
         return self.leaf_gammas_tray, self.leaf_gammashats_tray, self.model_tray_clf, self.model_tray_clfhat, self.alpha_tray
