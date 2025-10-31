@@ -23,7 +23,7 @@ def t_noise(n_samples, signal_y, snr=3.0, random_seed = None):
         np.random.seed(random_seed)
     signal_var = np.var(signal_y)
     target_noise_var = signal_var / snr
-    noise = np.random.standard_t(df=3, size=n_samples)
+    noise = np.random.standard_t(df=2, size=n_samples)
     noise_std = np.std(noise)
     noise *= np.sqrt(target_noise_var) / noise_std
     return noise
