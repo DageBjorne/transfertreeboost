@@ -14,6 +14,20 @@ def gaussian_noise(n_samples, signal_y, snr=3.0, random_seed = None):
     noise *= np.sqrt(target_noise_var) / noise_std
     return noise
 
+def t_noise(n_samples, signal_y, snr=3.0, random_seed = None):
+    """
+    Generate Gaussian noise with variance scaled to achieve the desired SNR
+    relative to the variance of signal_y.
+    """
+    if random_seed is not None:
+        np.random.seed(random_seed)
+    signal_var = np.var(signal_y)
+    target_noise_var = signal_var / snr
+    noise = np.random.standard_t(df=2, size=n_samples)
+    noise_std = np.std(noise)
+    noise *= np.sqrt(target_noise_var) / noise_std
+    return noise
+
 
 def slash_noise(n_samples, signal_y, snr=3.0, random_seed = None):
     """
@@ -59,8 +73,15 @@ def friedman1(n_samples, add_noise=False, noise_distribution='gaussian', n_featu
                 eps = slash_noise(n_samples, y)
             
             y += eps
+        elif noise_distribution == 't':
+            if random_seed is not None:
+                eps = t_noise(n_samples, y, random_seed = random_seed)
+            else:
+                eps = t_noise(n_samples, y)
+            
+            y += eps
         else:
-            raise Exception("No valid distribution, only gaussian or slash are accepted")
+            raise Exception("No valid distribution, only gaussian,t, or slash are accepted")
 
     if n_features > 5:
         noise_features = np.random.uniform(0, 1, size=(n_samples, n_features - 5))
@@ -104,8 +125,15 @@ def friedman1_altered(n_samples, add_noise=False, noise_distribution='gaussian',
         elif noise_distribution == 'slash':
             eps = slash_noise(n_samples, y)
             y += eps
+        elif noise_distribution == 't':
+            if random_seed is not None:
+                eps = t_noise(n_samples, y, random_seed = random_seed)
+            else:
+                eps = t_noise(n_samples, y)
+            
+            y += eps
         else:
-            raise Exception("No valid distribution, only gaussian or slash are accepted")
+            raise Exception("No valid distribution, only gaussian,t, or slash are accepted")
 
     if n_features > 5:
         noise_features = np.random.uniform(0, 1, size=(n_samples, n_features - 5))
