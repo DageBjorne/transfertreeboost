@@ -8,12 +8,12 @@ target_instances_list = [100, 200, 300]
 source_instances = 1000  #we use a fixed number of source instances
 
 d_list = [6]
-seed_list = [2,3]
+seed_list = [1,2,3,4,5]
 
 #LSTransferTreeBoost configs
 v_list = [0.05, 0.1]
-source_tree_size_list = [1,2]
-target_tree_size_list = [1,2]
+source_tree_size_list = [1, 2]
+target_tree_size_list = [1, 2]
 k_list = [0.01, 0.05]
 m_0_list = [0.5, 0.9]
 epoch_list = [1000]
