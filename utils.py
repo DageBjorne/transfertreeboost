@@ -170,10 +170,11 @@ def find_gamma_gammahat_Huber(unique_leaves_clf, indexed_leaves_clf,
     Q = np.eye(
         total_variable_len)  #construct this matrix for the quadratic part # OK
     Q[lad_indices] = 0  # OK
+
     c1 = np.zeros((1, len(indexed_leaves_clf)))
     c2 = np.zeros((1, len(unique_leaves_clf) + len(unique_leaves_clfhat)))
     c = np.concatenate((c1, c2), axis=1).flatten()
-    c[lad_indices] = 1 * delta  # OK
+    c[lad_indices] = 1 * delta   # OK
     # print(delta)
     # Constraint matrix
     A1 = np.eye(len(indexed_leaves_clf))
