@@ -364,7 +364,9 @@ for seed in c.seed_list:
                       val_x=X_target_val,
                       val_y=y_target_val,
                       early_stopping_rounds=5,
-                      show_curves=False)
+                      show_curves=False,
+                      eval_metric='rmse',
+                      quantile = 0.5)
             rmse = fiter.evaluate(X_target_test, y_target_test, metric='rmse')
             val_rmse = fiter.evaluate(X_target_val,
                                       y_target_val,
