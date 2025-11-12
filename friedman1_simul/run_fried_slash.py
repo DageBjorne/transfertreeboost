@@ -174,59 +174,59 @@ for seed in c.seed_list:
 
             #LS already done before
 
-            method = f'LSTransferTreeBoost'
-            fiter = LSTransferTreeBoost(epochs=epochs,
-                                        v=v,
-                                        source_tree_size=source_tree_size,
-                                        target_tree_size=target_tree_size,
-                                        k=k,
-                                        m_0=m_0)
-            fiter.fit(X_target_train,
-                      y_target_train,
-                      X_source_train,
-                      y_source_train,
-                      val_x=X_target_val,
-                      val_y=y_target_val,
-                      early_stopping_rounds=5,
-                      show_curves=False,
-                      eval_metric='rmse')
-            rmse = fiter.evaluate(X_target_test, y_target_test, metric='rmse')
-            val_rmse = fiter.evaluate(X_target_val,
-                                      y_target_val,
-                                      metric='rmse')
-            mae = fiter.evaluate(X_target_test, y_target_test, metric='mae')
-            val_mae = fiter.evaluate(X_target_val, y_target_val, metric='mae')
-            df.loc[len(df)] = [
-                seed, d, method, v, source_tree_size, target_tree_size, k, m_0,
-                epochs, val_rmse, val_mae, rmse, mae
-            ]
+            # method = f'LSTransferTreeBoost'
+            # fiter = LSTransferTreeBoost(epochs=epochs,
+            #                             v=v,
+            #                             source_tree_size=source_tree_size,
+            #                             target_tree_size=target_tree_size,
+            #                             k=k,
+            #                             m_0=m_0)
+            # fiter.fit(X_target_train,
+            #           y_target_train,
+            #           X_source_train,
+            #           y_source_train,
+            #           val_x=X_target_val,
+            #           val_y=y_target_val,
+            #           early_stopping_rounds=5,
+            #           show_curves=False,
+            #           eval_metric='rmse')
+            # rmse = fiter.evaluate(X_target_test, y_target_test, metric='rmse')
+            # val_rmse = fiter.evaluate(X_target_val,
+            #                           y_target_val,
+            #                           metric='rmse')
+            # mae = fiter.evaluate(X_target_test, y_target_test, metric='mae')
+            # val_mae = fiter.evaluate(X_target_val, y_target_val, metric='mae')
+            # df.loc[len(df)] = [
+            #     seed, d, method, v, source_tree_size, target_tree_size, k, m_0,
+            #     epochs, val_rmse, val_mae, rmse, mae
+            # ]
 
-            method = f'LADTransferTreeBoost'
-            fiter = LADTransferTreeBoost(epochs=epochs,
-                                         v=v,
-                                         source_tree_size=source_tree_size,
-                                         target_tree_size=target_tree_size,
-                                         k=k,
-                                         m_0=m_0)
-            fiter.fit(X_target_train,
-                      y_target_train,
-                      X_source_train,
-                      y_source_train,
-                      val_x=X_target_val,
-                      val_y=y_target_val,
-                      early_stopping_rounds=5,
-                      show_curves=False,
-                      eval_metric='rmse')
-            rmse = fiter.evaluate(X_target_test, y_target_test, metric='rmse')
-            val_rmse = fiter.evaluate(X_target_val,
-                                      y_target_val,
-                                      metric='rmse')
-            mae = fiter.evaluate(X_target_test, y_target_test, metric='mae')
-            val_mae = fiter.evaluate(X_target_val, y_target_val, metric='mae')
-            df.loc[len(df)] = [
-                seed, d, method, v, source_tree_size, target_tree_size, k, m_0,
-                epochs, val_rmse, val_mae, rmse, mae
-            ]
+            # method = f'LADTransferTreeBoost'
+            # fiter = LADTransferTreeBoost(epochs=epochs,
+            #                              v=v,
+            #                              source_tree_size=source_tree_size,
+            #                              target_tree_size=target_tree_size,
+            #                              k=k,
+            #                              m_0=m_0)
+            # fiter.fit(X_target_train,
+            #           y_target_train,
+            #           X_source_train,
+            #           y_source_train,
+            #           val_x=X_target_val,
+            #           val_y=y_target_val,
+            #           early_stopping_rounds=5,
+            #           show_curves=False,
+            #           eval_metric='rmse')
+            # rmse = fiter.evaluate(X_target_test, y_target_test, metric='rmse')
+            # val_rmse = fiter.evaluate(X_target_val,
+            #                           y_target_val,
+            #                           metric='rmse')
+            # mae = fiter.evaluate(X_target_test, y_target_test, metric='mae')
+            # val_mae = fiter.evaluate(X_target_val, y_target_val, metric='mae')
+            # df.loc[len(df)] = [
+            #     seed, d, method, v, source_tree_size, target_tree_size, k, m_0,
+            #     epochs, val_rmse, val_mae, rmse, mae
+            # ]
 
             method = f'MTransferTreeBoost'
             fiter = MTransferTreeBoost(epochs=epochs,
@@ -235,7 +235,7 @@ for seed in c.seed_list:
                                        target_tree_size=target_tree_size,
                                        k=k,
                                        m_0=m_0,
-                                       quantile=0.5)
+                                       quantile=0.35)
             fiter.fit(X_target_train,
                       y_target_train,
                       X_source_train,
@@ -255,7 +255,7 @@ for seed in c.seed_list:
                 seed, d, method, v, source_tree_size, target_tree_size, k, m_0,
                 epochs, val_rmse, val_mae, rmse, mae
             ]
-            df.to_csv('results/200_slash.csv')
+            df.to_csv('results/200_slash_035.csv')
 
 # df = pd.DataFrame(columns=[
 #     'seed', 'd', 'method', 'v', 'source_tree_size', 'target_tree_size', 'k',
