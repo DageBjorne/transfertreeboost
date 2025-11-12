@@ -1,0 +1,2 @@
+,seed,d,method,v,source_tree_size,target_tree_size,k,m_0,epochs,val_rmse,val_mae,rmse,mae
+0,70,3,MTransferTreeBoost,0.075,1,1,0.01,0.5,1000,2.1158297630060354,1.7071366418952003,2.131351613585036,1.7024937725465075
