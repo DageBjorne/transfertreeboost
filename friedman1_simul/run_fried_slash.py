@@ -235,7 +235,7 @@ for seed in c.seed_list:
                                        target_tree_size=target_tree_size,
                                        k=k,
                                        m_0=m_0,
-                                       quantile=0.62)
+                                       quantile=0.75)
             fiter.fit(X_target_train,
                       y_target_train,
                       X_source_train,
@@ -255,7 +255,7 @@ for seed in c.seed_list:
                 seed, d, method, v, source_tree_size, target_tree_size, k, m_0,
                 epochs, val_rmse, val_mae, rmse, mae
             ]
-            df.to_csv('results/200_slash_062.csv')
+            df.to_csv('results/200_slash_075.csv')
 
 # df = pd.DataFrame(columns=[
 #     'seed', 'd', 'method', 'v', 'source_tree_size', 'target_tree_size', 'k',
