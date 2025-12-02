@@ -6,3 +6,5 @@ seaborn==0.13.2
 
 torch==2.8.0
 xgboost==3.0.2
+
+m5py==0.3.3
