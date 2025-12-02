@@ -12,7 +12,7 @@ class LSTransferTreeBoost():
                  source_tree_size=2,
                  k=0.05,
                  m_0=0.9,
-                 min_samples_leaf=5):
+                 min_samples_leaf=1):
         self.v = v
         self.epochs = epochs
         self.target_tree_size = target_tree_size
@@ -225,7 +225,7 @@ class LADTransferTreeBoost():
                  source_tree_size=2,
                  k=0.05,
                  m_0=0.9,
-                 min_samples_leaf=5,
+                 min_samples_leaf=1,
                  optimizer_package='scipy'):
         self.v = v
         self.epochs = epochs
@@ -451,7 +451,7 @@ class MTransferTreeBoost():
                  source_tree_size=2,
                  k=0.05,
                  m_0=0.9,
-                 min_samples_leaf=5,
+                 min_samples_leaf=1,
                  quantile=0.9):
         self.v = v
         self.epochs = epochs
