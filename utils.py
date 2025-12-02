@@ -130,6 +130,7 @@ def find_gamma_gammahat_LAD(unique_leaves_clf, indexed_leaves_clf,
 
     #Combine two one constraint matrix
     A = np.vstack((A, Ag))
+    print(np.shape(A))
     b_ub = np.concatenate((b_ub, b_ub_g))
 
     # Solve LP

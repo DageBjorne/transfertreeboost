@@ -12,7 +12,7 @@ class LSTransferTreeBoost():
                  source_tree_size=2,
                  k=0.05,
                  m_0=0.9,
-                 min_samples_leaf=25):
+                 min_samples_leaf=5):
         self.v = v
         self.epochs = epochs
         self.target_tree_size = target_tree_size
@@ -225,7 +225,7 @@ class LADTransferTreeBoost():
                  source_tree_size=2,
                  k=0.05,
                  m_0=0.9,
-                 min_samples_leaf=25,
+                 min_samples_leaf=5,
                  optimizer_package='scipy'):
         self.v = v
         self.epochs = epochs
@@ -324,6 +324,8 @@ class LADTransferTreeBoost():
                                    len(y_train_target) + len(y_train_source))
 
         for m in range(self.epochs):
+            #CHECK: Might be bad naming as these are not residuals in LAD. However, they will be used
+            #for the LP problem to find gamma, gammahat!
             y_train_target_residuals = y_train_target - F[target_indices]
             y_train_source_residuals = y_train_source - F[source_indices]
 
@@ -449,7 +451,7 @@ class MTransferTreeBoost():
                  source_tree_size=2,
                  k=0.05,
                  m_0=0.9,
-                 min_samples_leaf=25,
+                 min_samples_leaf=5,
                  quantile=0.9):
         self.v = v
         self.epochs = epochs
