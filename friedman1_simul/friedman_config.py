@@ -8,7 +8,7 @@ target_instances_list = [100, 300, 500]
 source_instances = 1000  #we use a fixed number of source instances
 
 d_list = [3, 6, 9]
-seed_list = list(range(70,80))
+seed_list = list(range(85,90))
 
 #LSTransferTreeBoost configs
 v_list = [0.05, 0.1]
