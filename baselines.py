@@ -31,7 +31,7 @@ def train_xgboost(data_train, labels_train, data_val, labels_val, boosting_round
         evals=evallist,
         early_stopping_rounds=early_stopping_rounds,
         evals_result=evals_result,
-        verbose_eval=False  # You can still turn this on if you want
+        verbose_eval=False, 
     )
 
     if show_curve:
