@@ -8,3 +8,5 @@ torch==2.8.0
 xgboost==3.0.2
 
 m5py==0.3.3
+
+ucimlrepo==0.0.7
