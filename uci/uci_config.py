@@ -1,0 +1,30 @@
+import itertools
+
+seed_list = list(range(850,860)) #10 seeds for uci
+
+#LSTransferTreeBoost configs
+v_list = [0.1]
+source_tree_size_list = [2,3]
+target_tree_size_list = [1,2,3]
+k_list = [0, 0.01, 0.05]
+m_0_list = [0.1, 0.5, 0.9]
+epoch_list = [400]
+
+# Create full parameter grid ---
+param_grid_TransferTreeBoost = [
+    params for params in itertools.product(
+        v_list,
+        source_tree_size_list,
+        target_tree_size_list,
+        k_list,
+        m_0_list,
+        epoch_list
+    )
+    if not (params[3] == 0.0 and params[4] == 0.9) #filter out these bad ones
+]
+
+#XGBoost configs
+v_list = [0.1]
+target_tree_size_list = [1, 2, 3, 4, 5, 6]
+
+param_grid_XGBoost = list(itertools.product(v_list, target_tree_size_list))
