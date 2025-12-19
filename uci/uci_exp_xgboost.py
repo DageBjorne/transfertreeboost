@@ -88,7 +88,8 @@ for id in id_list:
 
         #randomly select the target set
         df = [df1, df2, df3]
-        random_index = np.random.choice([0,2])
+        np.random.seed(id)
+        random_index =  np.random.choice([0,2])
         data_target = df[random_index]
         data_source = pd.concat([df[i] for i in range(3) if i != random_index], ignore_index=True)
 

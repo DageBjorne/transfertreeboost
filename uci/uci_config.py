@@ -4,7 +4,7 @@ seed_list = list(range(850,860)) #10 seeds for uci
 
 #LSTransferTreeBoost configs
 v_list = [0.1]
-source_tree_size_list = [2,3]
+source_tree_size_list = [1,2,3]
 target_tree_size_list = [1,2,3]
 k_list = [0, 0.01, 0.05]
 m_0_list = [0.1, 0.5, 0.9]
