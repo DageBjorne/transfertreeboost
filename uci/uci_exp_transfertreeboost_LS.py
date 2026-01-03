@@ -95,8 +95,8 @@ for id in id_list:
         ###########################################################
 
         ### Split data into train/validation/test
-        data_temp, data_test = train_test_split(data_target, test_size=0.1, random_state=seed)
-        data_train, data_val = train_test_split(data_temp, test_size=0.1, random_state = 3)
+        data_temp, data_test = train_test_split(data_target, test_size=0.2, random_state=seed)
+        data_train, data_val = train_test_split(data_temp, test_size=0.25, random_state = 3)
 
         X_source_train = np.array(data_source[predictor_columns])
         y_source_train = np.array(data_source[target_column]) #change this to "Dgv" to use diameter as source label!
