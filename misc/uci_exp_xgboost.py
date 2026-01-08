@@ -1,21 +1,23 @@
 import sys
 
 sys.path.append('../')
-from core import  LSTransferTreeBoost # for simplicity we will work only with M
+from core import  MTransferTreeBoost # for simplicity we will work only with M
 import pandas as pd
 from sklearn.model_selection import train_test_split
 import numpy as np
 from utils import *  #only needed for xgboost
 import uci_config as c
 
+from baselines import *
+
 from ucimlrepo import fetch_ucirepo 
   
-id_list = [925, 165, 9, 477, 291, 162] #abalone = 1, InfraRed = 925, concrete = 165, Auto MPG = 9, Automobile = 10, 
+id_list = [925, 165, 9, 477, 242, 291] #abalone = 1, InfraRed = 925, concrete = 165, Auto MPG = 9, Automobile = 10, 
         #Real estate valuation = 477, Energy efficiency = 242, Air-foil self-noise = 291
 
 for id in id_list:
 
-    df_exp = pd.DataFrame(columns = ['seed', 'v', 'source_tree_size', 'target_tree_size', 'k', 'm_0', 'epochs',
+    df_exp = pd.DataFrame(columns = ['seed', 'v', 'target_tree_size',
                                                           'val_rmse', 'val_mae', 'rmse', 'mae'])
 
     for seed in c.seed_list:
@@ -34,9 +36,9 @@ for id in id_list:
 
         y = y[y.columns[0]] #select first response in cases of several alternatives
 
-        data = X.copy()
+        data = X.copy() 
         data['target'] = y #add this to the entire data, as we will order them
-        data = data.dropna() 
+        data = data.dropna()
         # Convert object columns to category first
         for col in data.select_dtypes(include='object').columns:
             data[col] = data[col].astype('category')
@@ -90,11 +92,8 @@ for id in id_list:
         df = [df1, df2, df3, df4]
         np.random.seed(id)
         random_index =  np.random.choice([0,3])
-        print(random_index)
         data_target = df[random_index]
-        data_source = pd.concat([df[i] for i in range(4) if i != random_index], ignore_index=True)
-        print(len(data_target))
-        print(len(data_source))
+        data_source = pd.concat([df[i] for i in range(3) if i != random_index], ignore_index=True)
 
         ###########################################################
 
@@ -104,7 +103,7 @@ for id in id_list:
 
         X_source_train = np.array(data_source[predictor_columns])
         y_source_train = np.array(data_source[target_column]) #change this to "Dgv" to use diameter as source label!
-        #y_source_train = y_source_train**1.5 #Label shift
+
         #Specific train and test set
         X_target_train = np.array(data_train[predictor_columns])
         y_target_train = np.array(data_train[target_column])
@@ -119,22 +118,26 @@ for id in id_list:
 
         ### Loop over possible hyperparameter settings
 
-        for config in c.param_grid_TransferTreeBoost:
-            v, source_tree_size, target_tree_size, k, m_0, epochs = config
-            fiter = LSTransferTreeBoost(epochs=epochs, 
-                                    v = v,
-                                    source_tree_size = source_tree_size,  
-                                    target_tree_size = target_tree_size,
-                                    k = k,
-                                    m_0 = m_0)
-            fiter.fit(X_target_train, y_target_train, X_source_train, y_source_train, val_x = X_target_val, val_y = y_target_val, show_curves = False)
-            rmse = fiter.evaluate(X_target_test, y_target_test, metric = 'rmse')
-            val_rmse = fiter.evaluate(X_target_val, y_target_val, metric = 'rmse')
-            mae = fiter.evaluate(X_target_test, y_target_test, metric = 'mae')
-            val_mae = fiter.evaluate(X_target_val, y_target_val, metric = 'mae')
-            df_exp.loc[len(df_exp)] = [seed, v, source_tree_size, target_tree_size, k, m_0, epochs, 
-                                                            val_rmse, val_mae, rmse, mae]
-            df_exp.to_csv(f'results/ttb_LS_{id}.csv')
+        for config in c.param_grid_XGBoost:
+            v, target_tree_size = config
+            params = {
+            'objective': 'reg:squarederror',  # Regression with squared error
+            'max_depth': target_tree_size,                   # Maximum depth of a tree
+            'eta': v,                       # Learning rate
+            'eval_metric': 'rmse',           # RMSE as evaluation metric
+            }
+                
+            bst = train_xgboost(X_target_train, y_target_train, X_target_val, y_target_val, boosting_rounds=400, 
+                                params=params, early_stopping_rounds=5, show_curve=False)
+            preds = test_xgboost(X_target_test, bst)
+            val_preds = test_xgboost(X_target_val, bst)
+            rmse = compute_rmse(preds, y_target_test)
+            mae = compute_mae(preds, y_target_test)
+            val_rmse = compute_rmse(val_preds, y_target_val)
+            val_mae = compute_mae(val_preds, y_target_val)
+            df_exp.loc[len(df_exp)] = [seed, v, target_tree_size, 
+                                        val_rmse, val_mae, rmse, mae]
+            df_exp.to_csv(f'results/xgb_{id}.csv')
 
 
 

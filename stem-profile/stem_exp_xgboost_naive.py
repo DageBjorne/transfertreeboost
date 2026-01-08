@@ -6,7 +6,7 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 import numpy as np
 from utils import *  #only needed for xgboost
-import rs_config as c
+import stem_config as c
   
 
 
@@ -16,8 +16,9 @@ df_exp = pd.DataFrame(columns = ['seed', 'v', 'target_tree_size',
 for seed in c.seed_list:
     
     # data (as pandas dataframes) 
-    data_target = pd.read_csv('../datasets/rs_lettland.csv')[0:300]
-    data_source = pd.read_csv('../datasets/rs_sweden.csv')[0:2000]
+    data = pd.read_csv('../datasets/stem_data.csv')
+    data_target = data[data['Species'] == 'Spruce']
+    data_source = data[data['Species'] == 'Pine']
 
 
 
@@ -41,6 +42,25 @@ for seed in c.seed_list:
     X_target_test = np.array(data_test[c.predictor_columns])
     y_target_test = np.array(data_test[c.target_column])
 
+    # Add domain indicator column
+    # Source = 0
+    source_indicator = np.zeros((X_source_train.shape[0], 1))
+    X_source_train = np.hstack((X_source_train, source_indicator))
+
+    # Target = 1
+    target_indicator = np.ones((X_target_train.shape[0], 1))
+    X_target_train = np.hstack((X_target_train, target_indicator))
+
+    X_target_comb = np.vstack((X_target_train, X_source_train))
+    y_target_comb = np.concatenate((y_target_train, y_source_train))
+    # Validation set (target → 1)
+    val_indicator = np.ones((X_target_val.shape[0], 1))
+    X_target_val = np.hstack((X_target_val, val_indicator))
+
+    # Test set (target → 1)
+    test_indicator = np.ones((X_target_test.shape[0], 1))
+    X_target_test = np.hstack((X_target_test, test_indicator))
+
     ############################################################
 
     ### Loop over possible hyperparameter settings
@@ -54,7 +74,7 @@ for seed in c.seed_list:
         'eval_metric': 'rmse',           # RMSE as evaluation metric
         }
             
-        bst = train_xgboost(X_target_train, y_target_train, X_target_val, y_target_val, boosting_rounds=400, 
+        bst = train_xgboost(X_target_comb, y_target_comb, X_target_val, y_target_val, boosting_rounds=400, 
                             params=params, early_stopping_rounds=5, show_curve=False)
         preds = test_xgboost(X_target_test, bst)
         val_preds = test_xgboost(X_target_val, bst)
@@ -64,8 +84,7 @@ for seed in c.seed_list:
         val_mae = compute_mae(val_preds, y_target_val)
         df_exp.loc[len(df_exp)] = [seed, v, target_tree_size, 
                                     val_rmse, val_mae, rmse, mae]
-        df_exp.to_csv(f'results/xgb.csv')
+        df_exp.to_csv(f'results/xgb_naive.csv')
 
 
 
-    

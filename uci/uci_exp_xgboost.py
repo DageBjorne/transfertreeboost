@@ -12,7 +12,7 @@ from baselines import *
 
 from ucimlrepo import fetch_ucirepo 
   
-id_list = [1, 925, 165, 9, 10, 477, 242, 291] #abalone = 1, InfraRed = 925, concrete = 165, Auto MPG = 9, Automobile = 10, 
+id_list = [925, 165, 9, 477, 291, 162] #abalone = 1, InfraRed = 925, concrete = 165, Auto MPG = 9, Automobile = 10, 
         #Real estate valuation = 477, Energy efficiency = 242, Air-foil self-noise = 291
 
 for id in id_list:
@@ -36,8 +36,9 @@ for id in id_list:
 
         y = y[y.columns[0]] #select first response in cases of several alternatives
 
-        data = X.copy()
+        data = X.copy() 
         data['target'] = y #add this to the entire data, as we will order them
+        data = data.dropna()
         # Convert object columns to category first
         for col in data.select_dtypes(include='object').columns:
             data[col] = data[col].astype('category')
@@ -80,18 +81,22 @@ for id in id_list:
 
         # Split data into three equally sized components
         n = len(data)
-        t = n // 3  # size of each part
+        t = n // 4  # size of each part
 
         df1 = data.iloc[:t]
         df2 = data.iloc[t:2*t]
-        df3 = data.iloc[2*t:]
+        df3 = data.iloc[2*t:3*t]
+        df4 = data.iloc[3*t:]
 
         #randomly select the target set
-        df = [df1, df2, df3]
+        df = [df1, df2, df3, df4]
         np.random.seed(id)
-        random_index =  np.random.choice([0,2])
+        random_index =  np.random.choice([0,3])
         data_target = df[random_index]
-        data_source = pd.concat([df[i] for i in range(3) if i != random_index], ignore_index=True)
+        data_source = pd.concat([df[i] for i in range(4) if i != random_index], ignore_index=True)
+
+        print(len(data_target))
+        print(len(data_source))
 
         ###########################################################
 
@@ -101,7 +106,7 @@ for id in id_list:
 
         X_source_train = np.array(data_source[predictor_columns])
         y_source_train = np.array(data_source[target_column]) #change this to "Dgv" to use diameter as source label!
-
+        #y_source_train = y_source_train**1.5
         #Specific train and test set
         X_target_train = np.array(data_train[predictor_columns])
         y_target_train = np.array(data_train[target_column])

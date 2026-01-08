@@ -16,8 +16,8 @@ df_exp = pd.DataFrame(columns = ['seed', 'v', 'source_tree_size', 'target_tree_s
 for seed in c.seed_list:
     
     # data (as pandas dataframes) 
-    data_target = pd.read_csv('../datasets/rs_lettland.csv')[0:500]
-    data_source = pd.read_csv('../datasets/rs_sweden.csv')
+    data_target = pd.read_csv('../datasets/rs_lettland.csv')[0:300]
+    data_source = pd.read_csv('../datasets/rs_sweden.csv')[0:2000]
 
 
 
@@ -60,7 +60,7 @@ for seed in c.seed_list:
         val_mae = fiter.evaluate(X_target_val, y_target_val, metric = 'mae')
         df_exp.loc[len(df_exp)] = [seed, v, source_tree_size, target_tree_size, k, m_0, epochs, 
                                                         val_rmse, val_mae, rmse, mae]
-        df_exp.to_csv(f'results/ttb_LS_500.csv')
+        df_exp.to_csv(f'results/ttb_LS.csv')
 
 
 

@@ -21,7 +21,8 @@ for id in id_list:
     for seed in c.seed_list:
 
         ### Read data from uci and process ###
-        data = fetch_ucirepo(id=id)  
+        data = fetch_ucirepo(id=id) 
+        data = data.dropna()  
         
         # data (as pandas dataframes) 
         X = data.data.features 
@@ -36,6 +37,7 @@ for id in id_list:
 
         data = X.copy()
         data['target'] = y #add this to the entire data, as we will order them
+        data = data.dropna() 
         # Convert object columns to category first
         for col in data.select_dtypes(include='object').columns:
             data[col] = data[col].astype('category')
