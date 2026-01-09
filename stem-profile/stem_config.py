@@ -1,6 +1,6 @@
 import itertools
 
-seed_list = list(range(850,860)) #10 seeds for uci
+seed_list = list(range(860,890)) #10 seeds for uci
 
 #LSTransferTreeBoost configs
 v_list = [0.1]
