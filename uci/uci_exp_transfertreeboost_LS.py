@@ -10,8 +10,8 @@ import uci_config as c
 
 from ucimlrepo import fetch_ucirepo 
   
-id_list = [925, 165, 9, 477, 291, 162] #abalone = 1, InfraRed = 925, concrete = 165, Auto MPG = 9, Automobile = 10, 
-        #Real estate valuation = 477, Energy efficiency = 242, Air-foil self-noise = 291
+id_list = [925, 165, 9, 477, 291, 162] #InfraRed = 925, concrete = 165, Auto MPG = 9, 
+        #Real estate valuation = 477, Air-foil self-noise = 291, forest fires = 162
 
 for id in id_list:
 
