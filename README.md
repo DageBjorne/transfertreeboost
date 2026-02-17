@@ -5,7 +5,7 @@ This repository is used for employing ```TransferTreeBoost```, a method for tran
 Currently, three methods are available:
 - ```LSTransferTreeBoost:``` For least-squares loss, 
 - ```LADTransferTreeBoost:``` For least absolute deviation loss 
-- `MTransferTreeBoost` For Huber loss. This is currently at a very initial stage.
+- `MTransferTreeBoost` For Huber loss. 
 
 ## Installation
 The packages used for TransferTreeBoost are fairly standard, and most likely other versions than the specified ones can be used. However, to make sure it works, do the following:
@@ -16,10 +16,10 @@ The packages used for TransferTreeBoost are fairly standard, and most likely oth
 
 ## Using TransferTreeBoost
 
-Simple examples follow, with default parameters (same default parameters for LAD as LS):
+Simple examples follow, with default parameters (same default parameters for LAD, LS, and M):
 
 ```
-from core import LSTransferTreeBoost # or LADTransferTreeBoost
+from core import LSTransferTreeBoost # or LADTransferTreeBoost, MTransferTreeBoost
 #instantiate model
 model = LSTransferTreeBoost(v=0.1, epochs=100, target_tree_size=2,
                             source_tree_size=2, k=0.05, m_0=0.9, min_samples_leaf=25)
@@ -40,6 +40,8 @@ model = LSTransferTreeBoost(v=0.1, epochs=100, target_tree_size=2,
 - **m_0**: Initial value of weight parameter. Determines the initial source tree contribution.
 
 - **min_samples_leaf**: Minimum amount of leaves in nodes (same for source and target).
+  
+- **quantile**: defines the threshold for outliers in ```MTransferTreeBoost``` (default=0.9).
 
 💡 *Tip:* The interaction between `m_0` and `k` controls the **transfer strength** —  
 `m_0` sets how much you start with from the source domain, while `k` determines how quickly that influence fades.
@@ -88,5 +90,7 @@ model = joblib.load('model.joblib') #to load saved model
 ## Run experiments
 To replicate our experiments, run the notebooks in the following folders:
 
-- `friedman_experiments`: experiments for the friedman #1 dataset. All results and visualizations are saved, but all of it can be reproduced following the provided notebooks.
-- `forest_experiments`: experiments for the forest variable prediction task. Unfortunately, access to the datasets are restricted due to confidentiality, so they cannot be shared. However, we have saved the results, so that the visualizations can be reproduced. Moreover, the training logic is provided. We decided to include this to be as transparent as we possible can. 
+- `friedman1_simul`: experiments for the friedman #1 dataset. All results and visualizations are saved, but all of it can be reproduced following the provided notebooks.
+- 'uci': experiments on UCI datasets 
+- `remote-sensing`: experiments for the (average) stem diameter prediction task. Unfortunately, access to the datasets are restricted due to confidentiality, so they cannot be shared. However, we have saved the results, so that the visualizations can be reproduced. Moreover, the training logic is provided. We decided to include this to be as transparent as we possible can.
+- 'stem-profile': experiments for the (individual) stem volume prediction task. As for the 'remote-sensing' data, this dataset cannot be shared, but the results are saved in the folder, training logic, and visualization notebooks are saved. 
