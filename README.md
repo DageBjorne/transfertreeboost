@@ -91,6 +91,6 @@ model = joblib.load('model.joblib') #to load saved model
 To replicate our experiments, run the notebooks in the following folders:
 
 - `friedman1_simul`: experiments for the friedman #1 dataset. All results and visualizations are saved, but all of it can be reproduced following the provided notebooks.
-- 'uci': experiments on UCI datasets 
+- `uci`: experiments on UCI datasets 
 - `remote-sensing`: experiments for the (average) stem diameter prediction task. Unfortunately, access to the datasets are restricted due to confidentiality, so they cannot be shared. However, we have saved the results, so that the visualizations can be reproduced. Moreover, the training logic is provided. We decided to include this to be as transparent as we possible can.
-- 'stem-profile': experiments for the (individual) stem volume prediction task. As for the 'remote-sensing' data, this dataset cannot be shared, but the results are saved in the folder, training logic, and visualization notebooks are saved. 
+- `stem-profile`: experiments for the (individual) stem volume prediction task. As for the `remote-sensing` data, this dataset cannot be shared, but the results are saved in the folder, training logic, and visualization notebooks are saved. 
