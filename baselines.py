@@ -16,8 +16,8 @@ import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 
 
-#xgboost (can also be used for naive transfer xgboost)
-def train_xgboost(data_train, labels_train, data_val, labels_val, boosting_rounds, params, show_curve = False, early_stopping_rounds=8):
+#xgboost (can also be used for naive transfer xgboost and train on source/refine on target)
+def train_xgboost(data_train, labels_train, data_val, labels_val, boosting_rounds, params, show_curve = False, early_stopping_rounds=8, xgb_model = None):
     dtrain = xgb.DMatrix(data_train, label=labels_train)
     dval = xgb.DMatrix(data_val, label=labels_val)
 
@@ -32,6 +32,7 @@ def train_xgboost(data_train, labels_train, data_val, labels_val, boosting_round
         early_stopping_rounds=early_stopping_rounds,
         evals_result=evals_result,
         verbose_eval=False, 
+        xgb_model = xgb_model
     )
 
     if show_curve:
