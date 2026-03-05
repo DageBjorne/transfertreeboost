@@ -20,6 +20,11 @@ for seed in c.seed_list:
     data_target = data[data['Species'] == 'Spruce']
     data_source = data[data['Species'] == 'Pine']
 
+    # #split according to latitude
+    # q3 = np.percentile(data.copy()['Lat'], 25)
+    # data_source = data[data['Lat'] >= q3]
+    # data_target = data[data['Lat'] < q3]
+
 
 
 

@@ -1,5 +1,8 @@
 import itertools
 
+concept_drift_param = 1.1 #1.0 is without concept drift
+covariate_shift_param = 0.0 #0.0 is without covariate shift
+
 seed_list = list(range(860,890)) #10 seeds for uci
 
 #LSTransferTreeBoost configs

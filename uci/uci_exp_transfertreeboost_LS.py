@@ -103,8 +103,11 @@ for id in id_list:
         data_train, data_val = train_test_split(data_temp, test_size=0.25, random_state = 3)
 
         X_source_train = np.array(data_source[predictor_columns])
-        y_source_train = np.array(data_source[target_column]) #change this to "Dgv" to use diameter as source label!
-        #y_source_train = y_source_train**1.5 #Label shift
+        y_source_train = np.array(data_source[target_column]) 
+
+        #add concept drift
+        y_source_train = y_source_train**c.concept_drift_param 
+
         #Specific train and test set
         X_target_train = np.array(data_train[predictor_columns])
         y_target_train = np.array(data_train[target_column])
@@ -134,7 +137,7 @@ for id in id_list:
             val_mae = fiter.evaluate(X_target_val, y_target_val, metric = 'mae')
             df_exp.loc[len(df_exp)] = [seed, v, source_tree_size, target_tree_size, k, m_0, epochs, 
                                                             val_rmse, val_mae, rmse, mae]
-            df_exp.to_csv(f'results/ttb_LS_{id}.csv')
+            df_exp.to_csv(f'results_concept_drift/ttb_LS_{c.concept_drift_param}_{id}.csv')
 
 
 

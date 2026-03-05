@@ -106,12 +106,25 @@ for id in id_list:
         #Split source data into train/val for this approach
         data_source_train, data_source_val = train_test_split(data_source, test_size=0.2, random_state=seed)
 
+        #add covariate shift
+        # for feature in predictor_columns:
+        #     if np.issubdtype(data_source_train[feature].dtype, np.number):
+        #         mean_val = data_source_train[feature].mean()
+        #         shift = mean_val * c.covariate_shift_param + mean_val * c.covariate_shift_param
+        #         data_source_train[feature] += shift
+        #         data_source_val[feature] += shift
+
         X_source_train = np.array(data_source_train[predictor_columns])
         y_source_train = np.array(data_source_train[target_column]) 
 
         X_source_val = np.array(data_source_val[predictor_columns])
         y_source_val = np.array(data_source_val[target_column]) 
-        #y_source_train = y_source_train**1.5
+
+        #add concept drift
+        y_source_train = y_source_train**c.concept_drift_param
+        y_source_val = y_source_val**c.concept_drift_param
+
+
         #Specific train and test set
         X_target_train = np.array(data_train[predictor_columns])
         y_target_train = np.array(data_train[target_column])
@@ -148,7 +161,7 @@ for id in id_list:
             val_mae = compute_mae(val_preds, y_target_val)
             df_exp.loc[len(df_exp)] = [seed, v, target_tree_size, 
                                         val_rmse, val_mae, rmse, mae]
-            df_exp.to_csv(f'results/xgb_warmstart_{id}.csv')
+            df_exp.to_csv(f'results_concept_drift/xgb_warmstart_{c.concept_drift_param}_{id}.csv')
 
 
 
