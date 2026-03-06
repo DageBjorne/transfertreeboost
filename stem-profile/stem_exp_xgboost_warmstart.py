@@ -36,7 +36,7 @@ for seed in c.seed_list:
     data_source_train, data_source_val = train_test_split(data_source, test_size=0.2, random_state=seed)
 
     X_source_train = np.array(data_source_train[c.predictor_columns])
-    y_source_train = np.array(data_source_train[c.target_column]) 
+    y_source_train = np.array(data_source_train['Height']) #change this to "Height" to use Height as source label!
 
     X_source_val = np.array(data_source_val[c.predictor_columns])
     y_source_val = np.array(data_source_val[c.target_column]) 
@@ -75,5 +75,5 @@ for seed in c.seed_list:
         val_mae = compute_mae(val_preds, y_target_val)
         df_exp.loc[len(df_exp)] = [seed, v, target_tree_size, 
                                     val_rmse, val_mae, rmse, mae]
-        df_exp.to_csv(f'results/xgb_warmstart.csv')
+        df_exp.to_csv(f'results_height/xgb_warmstart.csv')
 

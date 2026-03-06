@@ -1,0 +1,2 @@
+,seed,v,source_tree_size,target_tree_size,k,m_0,epochs,val_rmse,val_mae,rmse,mae
+0,860.0,0.1,1.0,1.0,0.0,0.1,400.0,4.751919893206352,3.8025645575956717,5.3189727833166405,4.35248218501613
