@@ -16,14 +16,23 @@ df_exp = pd.DataFrame(columns = ['seed', 'v', 'target_tree_size',
 for seed in c.seed_list:
     
     # data (as pandas dataframes) 
-    data_target = pd.read_csv('../datasets/rs_lettland.csv').sample(n=200, random_state=seed)
-    data_source = pd.read_csv('../datasets/rs_sweden.csv')[0:2000]
+    data_target = pd.read_csv('../datasets/rs_lettland.csv').sample(n=200, random_state=1)
+    data_source = pd.read_csv('../datasets/rs_sweden.csv').sample(n=2000, random_state=1)
 
     # # #split according to latitude
-    # data_target = pd.read_csv('../datasets/rs_lettland.csv')[0:300]
+    # data_target = pd.read_csv('../datasets/rs_lettland.csv').sample(n=200, random_state=1)
     # data_source = pd.read_csv('../datasets/rs_sweden.csv')
     # q3 = np.percentile(data_source.copy()['north_processed'], 75)
-    # data_source = data_source[data_source['north_processed'] >= q3][0:2000]
+    # data_source = data_source[data_source['north_processed'] >= q3]
+
+    ###########################################################
+
+    ### Split data into train/validation/test
+    data_temp, data_test = train_test_split(data_target, test_size=0.2, random_state=seed)
+    data_train, data_val = train_test_split(data_temp, test_size=0.25, random_state = 3)
+
+    X_source_train = np.array(data_source[c.predictor_columns])
+    y_source_train = np.array(data_source[c.predictor_columns]) #change this to "Volume" to use diameter as source label!
 
 
 
@@ -36,7 +45,7 @@ for seed in c.seed_list:
     data_source_train, data_source_val = train_test_split(data_source, test_size=0.2, random_state=seed)
 
     X_source_train = np.array(data_source_train[c.predictor_columns])
-    y_source_train = np.array(data_source_train["Volume"]) #set to "Volume to change source label!"
+    y_source_train = np.array(data_source_train[c.target_column]) #set to "Volume to change source label!"
 
     X_source_val = np.array(data_source_val[c.predictor_columns])
     y_source_val = np.array(data_source_val[c.target_column]) 
@@ -77,7 +86,7 @@ for seed in c.seed_list:
         val_mae = compute_mae(val_preds, y_target_val)
         df_exp.loc[len(df_exp)] = [seed, v, target_tree_size, 
                                     val_rmse, val_mae, rmse, mae]
-        df_exp.to_csv(f'results_volume/xgb_warmstart.csv')
+        df_exp.to_csv(f'results_normal/xgb_warmstart.csv')
 
 
 
