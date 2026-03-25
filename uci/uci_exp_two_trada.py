@@ -20,7 +20,7 @@ id_list = [925, 165, 9, 477, 291, 162] #InfraRed = 925, concrete = 165, Auto MPG
 
 for id in id_list:
 
-    df_exp = pd.DataFrame(columns = ['seed', 'rmse'])
+    df_exp = pd.DataFrame(columns = ['seed', 'lr', 'n_estimators', 'n_estimators_fs', 'cv', 'rmse'])
 
     for seed in c.seed_list:
 
@@ -117,21 +117,25 @@ for id in id_list:
 
         ############################################################
 
-        ### Loop over possible hyperparameter settings (only default for now)
+        ### Loop over possible hyperparameter settings
 
-        base_estimator = M5Prime()
-        model = TwoStageTrAdaBoostR2(base_estimator,
-                                n_estimators=30,
-                                n_estimators_fs=30,
-                                cv=10,
-                                lr=1)
-        model.fit(X_source_train, y_source_train,
-                    X_target_train, y_target_train)
-        preds = model.predict(X_target_test)
 
-        rmse = compute_rmse(preds, y_target_test)
-        df_exp.loc[len(df_exp)] = [seed, rmse]
-        df_exp.to_csv(f'results/two_trada_{id}.csv')
+        for config in c.param_grid_TwoTrada:
+            lr, n_estimators, n_estimators_fs, cv = config
+            base_estimator = M5Prime()
+            model = TwoStageTrAdaBoostR2(base_estimator,
+                                    n_estimators=n_estimators,
+                                    n_estimators_fs=n_estimators_fs,
+                                    cv=cv,
+                                    lr=lr)
+            model.fit(X_source_train, y_source_train,
+                        X_target_train, y_target_train)
+            preds = model.predict(X_target_test)
+
+            rmse = compute_rmse(preds, y_target_test)
+            mae = compute_mae(preds, y_target_test)
+            df_exp.loc[len(df_exp)] = [seed, lr, n_estimators, n_estimators_fs, cv, rmse]
+            df_exp.to_csv(f'results/two_trada_{id}.csv')
 
 
 
