@@ -20,7 +20,7 @@ id_list = [925, 165, 9, 477, 291, 162] #InfraRed = 925, concrete = 165, Auto MPG
 
 for id in id_list:
 
-    df_exp = pd.DataFrame(columns = ['seed', 'lr', 'n_estimators', 'n_estimators_fs', 'cv', 'rmse'])
+    df_exp = pd.DataFrame(columns = ['seed', 'lr', 'n_estimators', 'n_estimators_fs', 'cv', 'rmse', 'mae'])
 
     for seed in c.seed_list:
 
@@ -134,7 +134,7 @@ for id in id_list:
 
             rmse = compute_rmse(preds, y_target_test)
             mae = compute_mae(preds, y_target_test)
-            df_exp.loc[len(df_exp)] = [seed, lr, n_estimators, n_estimators_fs, cv, rmse]
+            df_exp.loc[len(df_exp)] = [seed, lr, n_estimators, n_estimators_fs, cv, rmse, mae]
             df_exp.to_csv(f'results/two_trada_{id}.csv')
 
 
