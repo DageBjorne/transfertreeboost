@@ -16,14 +16,14 @@ df_exp = pd.DataFrame(columns = ['seed', 'v', 'target_tree_size',
 for seed in c.seed_list:
     
     # data (as pandas dataframes) 
-    data_target = pd.read_csv('../datasets/rs_lettland.csv').sample(n=200, random_state=1)
-    data_source = pd.read_csv('../datasets/rs_sweden.csv').sample(n=2000, random_state=1)
+    # data_target = pd.read_csv('../datasets/rs_lettland.csv')[0:150]
+    # data_source = pd.read_csv('../datasets/rs_sweden.csv')[0:2000]
 
-    # # #split according to latitude
-    # data_target = pd.read_csv('../datasets/rs_lettland.csv').sample(n=200, random_state=1)
-    # data_source = pd.read_csv('../datasets/rs_sweden.csv')
-    # q3 = np.percentile(data_source.copy()['north_processed'], 75)
-    # data_source = data_source[data_source['north_processed'] >= q3]
+    # #split according to latitude
+    data_target = pd.read_csv('../datasets/rs_lettland.csv')[0:150]
+    data_source = pd.read_csv('../datasets/rs_sweden.csv')
+    q3 = np.percentile(data_source.copy()['north_processed'], 75)
+    data_source = data_source[data_source['north_processed'] >= q3][0:2000]
 
     ###########################################################
 
@@ -32,7 +32,7 @@ for seed in c.seed_list:
     data_train, data_val = train_test_split(data_temp, test_size=0.25, random_state = 3)
 
     X_source_train = np.array(data_source[c.predictor_columns])
-    y_source_train = np.array(data_source[c.target_column]) #change this to "Volume" to use diameter as source label!
+    y_source_train = np.array(data_source[c.target_column]) #change this to "Volume" to use volume as source label!
 
     #Specific train and test set
     X_target_train = np.array(data_train[c.predictor_columns])
@@ -67,7 +67,7 @@ for seed in c.seed_list:
         val_mae = compute_mae(val_preds, y_target_val)
         df_exp.loc[len(df_exp)] = [seed, v, target_tree_size, 
                                     val_rmse, val_mae, rmse, mae]
-        df_exp.to_csv(f'results_normal/xgb.csv')
+        df_exp.to_csv(f'results_location_150/xgb.csv') #change save_folder depending on split/dataset
 
 
 

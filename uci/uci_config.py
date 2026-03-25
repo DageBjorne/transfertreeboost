@@ -1,8 +1,5 @@
 import itertools
 
-concept_drift_param = 1.1 #1.0 is without concept drift
-covariate_shift_param = 0.0 #0.0 is without covariate shift
-
 seed_list = list(range(860,890)) #10 seeds for uci
 
 #LSTransferTreeBoost configs
@@ -27,7 +24,7 @@ param_grid_TransferTreeBoost = [
 ]
 
 #XGBoost configs
-v_list = [0.1]
+v_list = [0.05, 0.1, 0.15, 0.2, 0.25, 0.3]
 target_tree_size_list = [1, 2, 3, 4, 5, 6]
 
 param_grid_XGBoost = list(itertools.product(v_list, target_tree_size_list))

@@ -17,13 +17,13 @@ for seed in c.seed_list:
     
     # data (as pandas dataframes) 
     data = pd.read_csv('../datasets/stem_data.csv')
-    data_target = data[data['Species'] == 'Spruce']
-    data_source = data[data['Species'] == 'Pine']
+    # data_target = data[data['Species'] == 'Spruce']
+    # data_source = data[data['Species'] == 'Pine']
 
-    # #split according to latitude
-    # q3 = np.percentile(data.copy()['Lat'], 25)
-    # data_source = data[data['Lat'] >= q3]
-    # data_target = data[data['Lat'] < q3]
+    #split according to latitude
+    q3 = np.percentile(data.copy()['Lat'], 25)
+    data_source = data[data['Lat'] >= q3]
+    data_target = data[data['Lat'] < q3]
 
 
 
@@ -36,11 +36,11 @@ for seed in c.seed_list:
     data_source_train, data_source_val = train_test_split(data_source, test_size=0.2, random_state=seed)
 
     X_source_train = np.array(data_source_train[c.predictor_columns])
-    y_source_train = np.array(data_source_train['Height']) #change this to "Height" to use Height as source label!
+    y_source_train = np.array(data_source_train[c.target_column]) #change this to "Height" to use Height as source label!
 
     X_source_val = np.array(data_source_val[c.predictor_columns])
     y_source_val = np.array(data_source_val[c.target_column]) 
-    #y_source_train = y_source_train**1.5
+
     #Specific train and test set
     X_target_train = np.array(data_train[c.predictor_columns])
     y_target_train = np.array(data_train[c.target_column])
@@ -75,5 +75,5 @@ for seed in c.seed_list:
         val_mae = compute_mae(val_preds, y_target_val)
         df_exp.loc[len(df_exp)] = [seed, v, target_tree_size, 
                                     val_rmse, val_mae, rmse, mae]
-        df_exp.to_csv(f'results_height/xgb_warmstart.csv')
+        df_exp.to_csv(f'results_location/xgb_warmstart.csv') #change save_folder depending on split
 

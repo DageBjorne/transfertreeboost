@@ -35,7 +35,7 @@ for seed in c.seed_list:
     data_train, data_val = train_test_split(data_temp, test_size=0.25, random_state = 3)
 
     X_source_train = np.array(data_source[c.predictor_columns])
-    y_source_train = np.array(data_source['Height']) #change this to "Height" to use Height as source label!
+    y_source_train = np.array(data_source[c.predictor_columns]) #change this to "Height" to use Height as source label!
 
     #Specific train and test set
     X_target_train = np.array(data_train[c.predictor_columns])
@@ -66,7 +66,7 @@ for seed in c.seed_list:
         val_mae = fiter.evaluate(X_target_val, y_target_val, metric = 'mae')
         df_exp.loc[len(df_exp)] = [seed, v, source_tree_size, target_tree_size, k, m_0, epochs, 
                                                         val_rmse, val_mae, rmse, mae]
-        df_exp.to_csv(f'results_height/ttb_LS.csv')
+        df_exp.to_csv(f'results_height/ttb_LS.csv') #change save_folder depending on split
 
 
 

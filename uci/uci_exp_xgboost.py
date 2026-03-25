@@ -79,7 +79,7 @@ for id in id_list:
         data = data.drop(columns = selected_variable)
         predictor_columns.remove(selected_variable)
 
-        # Split data into three equally sized components
+        # Split data into four equally sized components
         n = len(data)
         t = n // 4  # size of each part
 
@@ -105,8 +105,8 @@ for id in id_list:
         data_train, data_val = train_test_split(data_temp, test_size=0.25, random_state = 3)
 
         X_source_train = np.array(data_source[predictor_columns])
-        y_source_train = np.array(data_source[target_column]) #change this to "Dgv" to use diameter as source label!
-        #y_source_train = y_source_train**1.5
+        y_source_train = np.array(data_source[target_column]) 
+
         #Specific train and test set
         X_target_train = np.array(data_train[predictor_columns])
         y_target_train = np.array(data_train[target_column])

@@ -68,7 +68,7 @@ for id in id_list:
 
         # Select the variable that has correlation closest to 0.4
         threshold = 0.4
-        idx = min(range(len(corr_coefs)), key=lambda i: abs(abs(corr_coefs[i]) - threshold)) #TODO: Fix this!!!! #UPDATE: probably fixed!
+        idx = min(range(len(corr_coefs)), key=lambda i: abs(abs(corr_coefs[i]) - threshold)) 
         print(idx)
         closest_value = corr_coefs[idx]
         selected_variable = X.columns[idx]
@@ -78,7 +78,7 @@ for id in id_list:
         data = data.drop(columns = selected_variable)
         predictor_columns.remove(selected_variable)
 
-        # Split data into three equally sized components
+        # Split data into four equally sized components
         n = len(data)
         t = n // 4  # size of each part
 
@@ -106,23 +106,11 @@ for id in id_list:
         #Split source data into train/val for this approach
         data_source_train, data_source_val = train_test_split(data_source, test_size=0.2, random_state=seed)
 
-        #add covariate shift
-        # for feature in predictor_columns:
-        #     if np.issubdtype(data_source_train[feature].dtype, np.number):
-        #         mean_val = data_source_train[feature].mean()
-        #         shift = mean_val * c.covariate_shift_param + mean_val * c.covariate_shift_param
-        #         data_source_train[feature] += shift
-        #         data_source_val[feature] += shift
-
         X_source_train = np.array(data_source_train[predictor_columns])
         y_source_train = np.array(data_source_train[target_column]) 
 
         X_source_val = np.array(data_source_val[predictor_columns])
         y_source_val = np.array(data_source_val[target_column]) 
-
-        #add concept drift
-        y_source_train = y_source_train**c.concept_drift_param
-        y_source_val = y_source_val**c.concept_drift_param
 
 
         #Specific train and test set
@@ -161,7 +149,7 @@ for id in id_list:
             val_mae = compute_mae(val_preds, y_target_val)
             df_exp.loc[len(df_exp)] = [seed, v, target_tree_size, 
                                         val_rmse, val_mae, rmse, mae]
-            df_exp.to_csv(f'results_concept_drift/xgb_warmstart_{c.concept_drift_param}_{id}.csv')
+            df_exp.to_csv(f'results/xgb_warmstart_{id}.csv')
 
 
 

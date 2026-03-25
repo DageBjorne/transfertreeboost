@@ -67,7 +67,7 @@ for id in id_list:
 
         # Select the variable that has correlation closest to 0.4
         threshold = 0.4
-        idx = min(range(len(corr_coefs)), key=lambda i: abs(abs(corr_coefs[i]) - threshold)) #TODO: Fix this!!!! #UPDATE: probably fixed!
+        idx = min(range(len(corr_coefs)), key=lambda i: abs(abs(corr_coefs[i]) - threshold)) 
         print(idx)
         closest_value = corr_coefs[idx]
         selected_variable = X.columns[idx]
@@ -77,7 +77,7 @@ for id in id_list:
         data = data.drop(columns = selected_variable)
         predictor_columns.remove(selected_variable)
 
-        # Split data into three equally sized components
+        # Split data into four equally sized components
         n = len(data)
         t = n // 4  # size of each part
 
@@ -105,8 +105,6 @@ for id in id_list:
         X_source_train = np.array(data_source[predictor_columns])
         y_source_train = np.array(data_source[target_column]) 
 
-        #add concept drift
-        y_source_train = y_source_train**c.concept_drift_param 
 
         #Specific train and test set
         X_target_train = np.array(data_train[predictor_columns])
