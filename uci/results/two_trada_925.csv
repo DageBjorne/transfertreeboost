@@ -1,0 +1,2 @@
+,seed,lr,n_estimators,n_estimators_fs,cv,rmse,mae
+0,860.0,0.1,10.0,10.0,5.0,0.26395818432627327,0.20441464897487194
