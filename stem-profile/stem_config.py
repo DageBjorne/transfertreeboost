@@ -30,15 +30,13 @@ target_tree_size_list = [1, 2, 3, 4, 5, 6]
 param_grid_XGBoost = list(itertools.product(v_list, target_tree_size_list))
 
 #Two-stage TrAdaBoost.R2 configs
-lr_list = [1.0]
-n_estimators_list = [30]
-n_estimators_fs_list = [30]
-cv_list = [10]
+lr_list = [0.05, 0.1, 0.25, 0.5, 1.0]
+n_estimators_list = [10, 20, 30, 50, 100, 150]
+# n_estimators_fs_list = [30]
+# cv_list = [10]
 
 param_grid_TwoTrada = list(itertools.product(lr_list, 
-                                             n_estimators_list, 
-                                             n_estimators_fs_list,
-                                             cv_list))
+                                             n_estimators_list))
 
 predictor_columns = [str(i) for i in range(3, 26)]
 target_column = 'estimated_volume'

@@ -8,7 +8,7 @@ import uci_config as c
 
 import warnings
 warnings.filterwarnings('ignore')
-from adapt.instance_based import TwoStageTrAdaBoostR2
+from adapt.instance_based import TrAdaBoostR2
 from m5py import M5Prime
 
 from baselines import *
@@ -20,7 +20,7 @@ id_list = [925, 165, 9, 477, 291, 162] #InfraRed = 925, concrete = 165, Auto MPG
 
 for id in id_list:
 
-    df_exp = pd.DataFrame(columns = ['seed', 'lr', 'n_estimators', 'n_estimators_fs', 'cv', 'rmse', 'mae'])
+    df_exp = pd.DataFrame(columns = ['seed', 'lr', 'n_estimators', 'rmse', 'mae'])
 
     for seed in c.seed_list:
 
@@ -121,12 +121,10 @@ for id in id_list:
 
 
         for config in c.param_grid_TwoTrada:
-            lr, n_estimators, n_estimators_fs, cv = config
+            lr, n_estimators = config
             base_estimator = M5Prime()
-            model = TwoStageTrAdaBoostR2(base_estimator,
+            model = TrAdaBoostR2(base_estimator,
                                     n_estimators=n_estimators,
-                                    n_estimators_fs=n_estimators_fs,
-                                    cv=cv,
                                     lr=lr)
             model.fit(X_source_train, y_source_train,
                         X_target_train, y_target_train)
@@ -134,7 +132,7 @@ for id in id_list:
 
             rmse = compute_rmse(preds, y_target_test)
             mae = compute_mae(preds, y_target_test)
-            df_exp.loc[len(df_exp)] = [seed, lr, n_estimators, n_estimators_fs, cv, rmse, mae]
+            df_exp.loc[len(df_exp)] = [seed, lr, n_estimators, rmse, mae]
             df_exp.to_csv(f'results/two_trada_{id}.csv')
 
 
