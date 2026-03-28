@@ -13,7 +13,7 @@ from m5py import M5Prime
 
 from baselines import *
   
-df_exp = pd.DataFrame(columns = ['seed', 'lr', 'n_estimators', 'n_estimators_fs', 'cv', 'rmse', 'mae'])
+df_exp = pd.DataFrame(columns = ['seed', 'lr', 'n_estimators', 'rmse', 'mae'])
 
 for seed in c.seed_list:
     
