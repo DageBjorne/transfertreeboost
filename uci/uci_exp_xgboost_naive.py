@@ -14,8 +14,8 @@ from ucimlrepo import fetch_ucirepo
  
 
   
-id_list = [925] #abalone = 1, InfraRed = 925, concrete = 165, Auto MPG = 9, Automobile = 10, 
-        #Real estate valuation = 477, Energy efficiency = 242, Air-foil self-noise = 291
+id_list = [925, 165, 9, 477, 291, 162] #InfraRed = 925, concrete = 165, Auto MPG = 9, 
+        #Real estate valuation = 477, Air-foil self-noise = 291, forest fires = 162
 
 for id in id_list:
 
@@ -108,8 +108,7 @@ for id in id_list:
 
         X_source_train = np.array(data_source[predictor_columns])
         # Split
-        y_source_train = np.array(data_source[target_column])#change this to "Dgv" to use diameter as source label!
-        y_source_train = y_source_train**1.5
+        y_source_train = np.array(data_source[target_column])
         #Specific train and test set
         X_target_train = np.array(data_train[predictor_columns])
         y_target_train = np.array(data_train[target_column])
@@ -162,7 +161,7 @@ for id in id_list:
             val_mae = compute_mae(val_preds, y_target_val)
             df_exp.loc[len(df_exp)] = [seed, v, target_tree_size, 
                                         val_rmse, val_mae, rmse, mae]
-            df_exp.to_csv(f'results/xgb_naive_{id}_cos.csv')
+            df_exp.to_csv(f'results/xgb_naive_{id}.csv')
 
 
 
