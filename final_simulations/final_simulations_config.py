@@ -28,9 +28,8 @@ param_grid_TransferTreeBoost = [
 #XGBoost configs
 v_list = [0.05, 0.075, 0.1, 0.125, 0.15, 0.175, 0.2, 0.225, 0.25, 0.275, 0.3]
 target_tree_size_list = [1, 2, 3, 4, 5, 6, 7]
-subsample_list = [1.0]
 
-param_grid_XGBoost = list(itertools.product(v_list, target_tree_size_list, subsample_list))
+param_grid_XGBoost = list(itertools.product(v_list, target_tree_size_list))
 
 #Two-stage TrAdaBoost.R2 configs
 lr_list = [0.05, 0.1, 0.25, 0.5, 1.0]
