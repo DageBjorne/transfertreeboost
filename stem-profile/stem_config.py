@@ -3,11 +3,11 @@ import itertools
 seed_list = list(range(860,890)) #10 seeds for uci
 
 #LSTransferTreeBoost configs
-v_list = [0.1]
+v_list = [0.05, 0.1, 0.2, 0.3]
 source_tree_size_list = [1,2,3]
 target_tree_size_list = [1,2,3]
-k_list = [0, 0.01, 0.05]
-m_0_list = [0.1, 0.5, 0.9]
+k_list = [0.01, 0.0]
+m_0_list = [0.9, 0.5]
 epoch_list = [400]
 
 # Create full parameter grid ---
@@ -20,13 +20,13 @@ param_grid_TransferTreeBoost = [
         m_0_list,
         epoch_list
     )
-    if not (params[3] == 0.0 and params[4] == 0.9) #filter out these bad ones
+    if (params[3] == 0.0 and params[4] == 0.5) or #filter out here
+       (params[3] == 0.01 and params[4] == 0.9)
 ]
 
 #XGBoost configs
-v_list = [0.05, 0.1, 0.15, 0.2, 0.25, 0.3]
-target_tree_size_list = [1, 2, 3, 4, 5, 6]
-
+v_list = [0.05, 0.075, 0.1, 0.125, 0.15, 0.175, 0.2, 0.225, 0.25, 0.275, 0.3]
+target_tree_size_list = [1, 2, 3, 4, 5, 6, 7]
 param_grid_XGBoost = list(itertools.product(v_list, target_tree_size_list))
 
 #Two-stage TrAdaBoost.R2 configs

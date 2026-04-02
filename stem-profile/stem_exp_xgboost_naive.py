@@ -17,20 +17,25 @@ for seed in c.seed_list:
     
     # data (as pandas dataframes) 
     data = pd.read_csv('../datasets/stem_data.csv')
-    data_target = data[data['Species'] == 'Spruce']
-    data_source = data[data['Species'] == 'Pine']
+    # data_target = data[data['Species'] == 'Spruce']
+    # data_source = data[data['Species'] == 'Pine']
+
+    # #split according to latitude
+    q3 = np.percentile(data.copy()['Lat'], 25)
+    data_source = data[data['Lat'] >= q3]
+    data_target = data[data['Lat'] < q3]
 
 
 
 
     ###########################################################
-
+    
     ### Split data into train/validation/test
     data_temp, data_test = train_test_split(data_target, test_size=0.2, random_state=seed)
     data_train, data_val = train_test_split(data_temp, test_size=0.25, random_state = 3)
 
     X_source_train = np.array(data_source[c.predictor_columns])
-    y_source_train = np.array(data_source[c.target_column]) #change this to "Dgv" to use diameter as source label!
+    y_source_train = np.array(data_source[c.target_column]) #change this to "Height" to use Height as source label!
 
     #Specific train and test set
     X_target_train = np.array(data_train[c.predictor_columns])
@@ -42,6 +47,7 @@ for seed in c.seed_list:
     X_target_test = np.array(data_test[c.predictor_columns])
     y_target_test = np.array(data_test[c.target_column])
 
+    ############################################################
     # Add domain indicator column
     # Source = 0
     source_indicator = np.zeros((X_source_train.shape[0], 1))
@@ -84,7 +90,7 @@ for seed in c.seed_list:
         val_mae = compute_mae(val_preds, y_target_val)
         df_exp.loc[len(df_exp)] = [seed, v, target_tree_size, 
                                     val_rmse, val_mae, rmse, mae]
-        df_exp.to_csv(f'results/xgb_naive.csv')
+        df_exp.to_csv(f'results_location/xgb_naive.csv')
 
 
 

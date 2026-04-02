@@ -16,23 +16,26 @@ df_exp = pd.DataFrame(columns = ['seed', 'v', 'target_tree_size',
 for seed in c.seed_list:
     
     # data (as pandas dataframes) 
-    data_target = pd.read_csv('../datasets/rs_lettland.csv')[0:300]
-    data_source = pd.read_csv('../datasets/rs_sweden.csv')[0:2000]
-
-    # #split according to latitude
     # data_target = pd.read_csv('../datasets/rs_lettland.csv')[0:300]
-    # data_source = pd.read_csv('../datasets/rs_sweden.csv')
-    # q3 = np.percentile(data_source.copy()['north_processed'], 75)
-    # data_source = data_source[data_source['north_processed'] >= q3][0:2000]
+    # data_source = pd.read_csv('../datasets/rs_sweden.csv')[0:2000]
+
+    #split according to latitude
+    data_target = pd.read_csv('../datasets/rs_lettland.csv')[0:300]
+    data_source = pd.read_csv('../datasets/rs_sweden.csv')
+    q3 = np.percentile(data_source.copy()['north_processed'], 75)
+    data_source = data_source[data_source['north_processed'] >= q3][0:2000]
 
     ###########################################################
 
-    ### Split data into train/validation/test
+### Split data into train/validation/test
     data_temp, data_test = train_test_split(data_target, test_size=0.2, random_state=seed)
     data_train, data_val = train_test_split(data_temp, test_size=0.25, random_state = 3)
 
+    #Split source data into train/val for this approach
+    data_source_train, data_source_val = train_test_split(data_source, test_size=0.2, random_state=seed)
+
     X_source_train = np.array(data_source[c.predictor_columns])
-    y_source_train = np.array(data_source[c.target_column]) #change this to "Volume" to use volume as source label!
+    y_source_train = np.array(data_source[c.target_column]) #change this to "Volume" to use Volume as source label!
 
     #Specific train and test set
     X_target_train = np.array(data_train[c.predictor_columns])
@@ -43,6 +46,26 @@ for seed in c.seed_list:
 
     X_target_test = np.array(data_test[c.predictor_columns])
     y_target_test = np.array(data_test[c.target_column])
+
+    ############################################################
+    # Add domain indicator column
+    # Source = 0
+    source_indicator = np.zeros((X_source_train.shape[0], 1))
+    X_source_train = np.hstack((X_source_train, source_indicator))
+
+    # Target = 1
+    target_indicator = np.ones((X_target_train.shape[0], 1))
+    X_target_train = np.hstack((X_target_train, target_indicator))
+
+    X_target_comb = np.vstack((X_target_train, X_source_train))
+    y_target_comb = np.concatenate((y_target_train, y_source_train))
+    # Validation set (target → 1)
+    val_indicator = np.ones((X_target_val.shape[0], 1))
+    X_target_val = np.hstack((X_target_val, val_indicator))
+
+    # Test set (target → 1)
+    test_indicator = np.ones((X_target_test.shape[0], 1))
+    X_target_test = np.hstack((X_target_test, test_indicator))
 
     ############################################################
 
@@ -57,7 +80,7 @@ for seed in c.seed_list:
         'eval_metric': 'rmse',           # RMSE as evaluation metric
         }
             
-        bst = train_xgboost(X_target_train, y_target_train, X_target_val, y_target_val, boosting_rounds=400, 
+        bst = train_xgboost(X_target_comb, y_target_comb, X_target_val, y_target_val, boosting_rounds=400, 
                             params=params, early_stopping_rounds=5, show_curve=False)
         preds = test_xgboost(X_target_test, bst)
         val_preds = test_xgboost(X_target_val, bst)
@@ -67,8 +90,7 @@ for seed in c.seed_list:
         val_mae = compute_mae(val_preds, y_target_val)
         df_exp.loc[len(df_exp)] = [seed, v, target_tree_size, 
                                     val_rmse, val_mae, rmse, mae]
-        df_exp.to_csv(f'results_normal/xgb.csv') #change save_folder depending on split/dataset
-
+        df_exp.to_csv(f'results_location/xgb_naive.csv') #change folder depending on what you do!
 
 
     

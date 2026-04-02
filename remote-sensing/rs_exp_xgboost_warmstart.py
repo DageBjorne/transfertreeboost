@@ -16,11 +16,11 @@ df_exp = pd.DataFrame(columns = ['seed', 'v', 'target_tree_size',
 for seed in c.seed_list:
     
     # data (as pandas dataframes) 
-    # data_target = pd.read_csv('../datasets/rs_lettland.csv')[0:150]
+    # data_target = pd.read_csv('../datasets/rs_lettland.csv')[0:300]
     # data_source = pd.read_csv('../datasets/rs_sweden.csv')[0:2000]
 
     #split according to latitude
-    data_target = pd.read_csv('../datasets/rs_lettland.csv')[0:150]
+    data_target = pd.read_csv('../datasets/rs_lettland.csv')[0:300]
     data_source = pd.read_csv('../datasets/rs_sweden.csv')
     q3 = np.percentile(data_source.copy()['north_processed'], 75)
     data_source = data_source[data_source['north_processed'] >= q3][0:2000]
@@ -76,7 +76,7 @@ for seed in c.seed_list:
         val_mae = compute_mae(val_preds, y_target_val)
         df_exp.loc[len(df_exp)] = [seed, v, target_tree_size, 
                                     val_rmse, val_mae, rmse, mae]
-        df_exp.to_csv(f'results_location_150/xgb_warmstart.csv') #change save_folder depending on split/dataset
+        df_exp.to_csv(f'results_location/xgb_warmstart.csv') #change save_folder depending on split/dataset
 
 
 

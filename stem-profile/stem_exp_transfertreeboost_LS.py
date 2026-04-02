@@ -35,7 +35,7 @@ for seed in c.seed_list:
     data_train, data_val = train_test_split(data_temp, test_size=0.25, random_state = 3)
 
     X_source_train = np.array(data_source[c.predictor_columns])
-    y_source_train = np.array(data_source[c.predictor_columns]) #change this to "Height" to use Height as source label!
+    y_source_train = np.array(data_source["Height"]) #change this to "Height" to use Height as source label!
 
     #Specific train and test set
     X_target_train = np.array(data_train[c.predictor_columns])

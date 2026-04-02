@@ -10,7 +10,7 @@ import uci_config as c
 
 from ucimlrepo import fetch_ucirepo 
   
-id_list = [925, 165, 9, 477, 291, 162] #InfraRed = 925, concrete = 165, Auto MPG = 9, 
+id_list = [291, 162] #InfraRed = 925, concrete = 165, Auto MPG = 9, 
         #Real estate valuation = 477, Air-foil self-noise = 291, forest fires = 162
 
 for id in id_list:
@@ -135,7 +135,7 @@ for id in id_list:
             val_mae = fiter.evaluate(X_target_val, y_target_val, metric = 'mae')
             df_exp.loc[len(df_exp)] = [seed, v, source_tree_size, target_tree_size, k, m_0, epochs, 
                                                             val_rmse, val_mae, rmse, mae]
-            df_exp.to_csv(f'results_concept_drift/ttb_LS_{c.concept_drift_param}_{id}.csv')
+            df_exp.to_csv(f'results/ttb_LS_{id}.csv')
 
 
 

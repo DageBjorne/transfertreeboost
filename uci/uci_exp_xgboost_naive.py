@@ -143,12 +143,13 @@ for id in id_list:
         ### Loop over possible hyperparameter settings
 
         for config in c.param_grid_XGBoost:
-            v, target_tree_size = config
+            v, target_tree_size, subsample = config
             params = {
             'objective': 'reg:squarederror',  # Regression with squared error
             'max_depth': target_tree_size,                   # Maximum depth of a tree
             'eta': v,                       # Learning rate
             'eval_metric': 'rmse',           # RMSE as evaluation metric
+            'subsample': subsample
             }
                 
             bst = train_xgboost(X_target_comb, y_target_comb, X_target_val, y_target_val, boosting_rounds=400, 
@@ -159,7 +160,7 @@ for id in id_list:
             mae = compute_mae(preds, y_target_test)
             val_rmse = compute_rmse(val_preds, y_target_val)
             val_mae = compute_mae(val_preds, y_target_val)
-            df_exp.loc[len(df_exp)] = [seed, v, target_tree_size, 
+            df_exp.loc[len(df_exp)] = [seed, v, target_tree_size,
                                         val_rmse, val_mae, rmse, mae]
             df_exp.to_csv(f'results/xgb_naive_{id}.csv')
 

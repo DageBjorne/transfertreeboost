@@ -17,7 +17,7 @@ id_list = [925, 165, 9, 477, 291, 162] #InfraRed = 925, concrete = 165, Auto MPG
 
 for id in id_list:
 
-    df_exp = pd.DataFrame(columns = ['seed', 'v', 'target_tree_size',
+    df_exp = pd.DataFrame(columns = ['seed', 'v', 'target_tree_size', 
                                                           'val_rmse', 'val_mae', 'rmse', 'mae'])
 
     for seed in c.seed_list:
@@ -122,12 +122,13 @@ for id in id_list:
         ### Loop over possible hyperparameter settings
 
         for config in c.param_grid_XGBoost:
-            v, target_tree_size = config
+            v, target_tree_size, subsample = config
             params = {
             'objective': 'reg:squarederror',  # Regression with squared error
             'max_depth': target_tree_size,                   # Maximum depth of a tree
             'eta': v,                       # Learning rate
-            'eval_metric': 'rmse',           # RMSE as evaluation metric
+            'eval_metric': 'rmse', 
+            'subsample': subsample          # RMSE as evaluation metric
             }
                 
             bst = train_xgboost(X_target_train, y_target_train, X_target_val, y_target_val, boosting_rounds=400, 
