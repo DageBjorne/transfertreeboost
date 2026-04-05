@@ -3,7 +3,7 @@ import itertools
 seed_list = list(range(930,950)) #10 seeds for uci
 d_list = list(range(1,11))
 #LSTransferTreeBoost configs
-v_list = [0.1, 0.2, 0.3]
+v_list = [0.05, 0.1, 0.2, 0.3]
 source_tree_size_list = [1,2,3]
 target_tree_size_list = [1,2,3]
 k_list = [0.01, 0.0]
