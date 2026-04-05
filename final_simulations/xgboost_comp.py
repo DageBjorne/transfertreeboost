@@ -33,8 +33,8 @@ for seed in c.seed_list:
         n_features=10,
         random_seed=seed + 10)  #do NOT add noise to test set!!!!
     X_target_train, y_target_train = friedman1(
-        n_samples=300,
-        add_noise=True,
+        n_samples=150,
+        add_noise=False,
         noise_distribution='gaussian',
         n_features=10,
         random_seed=seed)  #add noise to train set
@@ -43,8 +43,8 @@ for seed in c.seed_list:
         
     
         X_source_train, y_source_train = friedman1_altered(
-            n_samples=1000,
-            add_noise=True,
+            n_samples=500,
+            add_noise=False,
             noise_distribution='gaussian',
             n_features=10,
             d=d,
@@ -54,16 +54,16 @@ for seed in c.seed_list:
 
         method = f'XGBoost'
         for config in c.param_grid_XGBoost:
-            v, target_tree_size, subsample = config
+            v, target_tree_size = config
             params = {
             'objective': 'reg:squarederror',  # Regression with squared error
             'max_depth': target_tree_size,                   # Maximum depth of a tree
             'eta': v,                       # Learning rate
             'eval_metric': 'rmse', 
-            'subsample': subsample          # RMSE as evaluation metric
+        # RMSE as evaluation metric
             }
                 
-            bst = train_xgboost(X_target_train, y_target_train, X_target_val, y_target_val, boosting_rounds=400, 
+            bst = train_xgboost(X_target_train, y_target_train, X_target_val, y_target_val, boosting_rounds=1000, 
                                 params=params, early_stopping_rounds=5, show_curve=False)
             preds = test_xgboost(X_target_test, bst)
             val_preds = test_xgboost(X_target_val, bst)
@@ -73,4 +73,4 @@ for seed in c.seed_list:
             val_mae = compute_mae(val_preds, y_target_val)
             df.loc[len(df)] = [seed, d, v, target_tree_size, 
                                         val_rmse, val_mae, rmse, mae]
-            df.to_csv(f'results/xgb.csv')
+            df.to_csv(f'results_150/xgb.csv')

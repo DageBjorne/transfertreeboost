@@ -152,7 +152,7 @@ for id in id_list:
             'subsample': subsample
             }
                 
-            bst = train_xgboost(X_target_comb, y_target_comb, X_target_val, y_target_val, boosting_rounds=400, 
+            bst = train_xgboost(X_target_comb, y_target_comb, X_target_val, y_target_val, boosting_rounds=1000, 
                                 params=params, early_stopping_rounds=5, show_curve=False)
             preds = test_xgboost(X_target_test, bst)
             val_preds = test_xgboost(X_target_val, bst)
@@ -162,7 +162,7 @@ for id in id_list:
             val_mae = compute_mae(val_preds, y_target_val)
             df_exp.loc[len(df_exp)] = [seed, v, target_tree_size,
                                         val_rmse, val_mae, rmse, mae]
-            df_exp.to_csv(f'results/xgb_naive_{id}.csv')
+            df_exp.to_csv(f'results_new/xgb_naive_{id}.csv')
 
 
 

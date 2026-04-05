@@ -137,10 +137,10 @@ for id in id_list:
             'subsample': subsample         # RMSE as evaluation metric
             }
 
-            bst_base = train_xgboost(X_source_train, y_source_train, X_source_val, y_source_val, boosting_rounds=400, 
+            bst_base = train_xgboost(X_source_train, y_source_train, X_source_val, y_source_val, boosting_rounds=1000, 
                                 params=params, early_stopping_rounds=5, show_curve=False)
                 
-            bst = train_xgboost(X_target_train, y_target_train, X_target_val, y_target_val, boosting_rounds=400, 
+            bst = train_xgboost(X_target_train, y_target_train, X_target_val, y_target_val, boosting_rounds=1000, 
                                 params=params, early_stopping_rounds=5, show_curve=False, xgb_model = bst_base)
             preds = test_xgboost(X_target_test, bst)
             val_preds = test_xgboost(X_target_val, bst)
@@ -150,7 +150,7 @@ for id in id_list:
             val_mae = compute_mae(val_preds, y_target_val)
             df_exp.loc[len(df_exp)] = [seed, v, target_tree_size,
                                         val_rmse, val_mae, rmse, mae]
-            df_exp.to_csv(f'results/xgb_warmstart_{id}.csv')
+            df_exp.to_csv(f'results_new/xgb_warmstart_{id}.csv')
 
 
 

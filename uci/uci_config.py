@@ -8,7 +8,7 @@ source_tree_size_list = [1,2,3]
 target_tree_size_list = [1,2,3]
 k_list = [0.01, 0.0]
 m_0_list = [0.9, 0.5]
-epoch_list = [400]
+epoch_list = [1000]
 
 # Create full parameter grid ---
 param_grid_TransferTreeBoost = [
