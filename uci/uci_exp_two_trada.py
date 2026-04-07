@@ -20,7 +20,7 @@ from baselines import *
 
 from ucimlrepo import fetch_ucirepo 
   
-id_list = [165, 9, 477, 291, 162] #InfraRed = 925, concrete = 165, Auto MPG = 9, 
+id_list = [925, 165, 9, 477, 291, 162] #InfraRed = 925, concrete = 165, Auto MPG = 9, 
         #Real estate valuation = 477, Air-foil self-noise = 291, forest fires = 162
 
 for id in id_list:
@@ -132,8 +132,8 @@ for id in id_list:
             #     base_estimator=LinearRegression(),
             #     max_depth=tree_size
             # )
-            base_estimator = M5Prime(max_depth=tree_size, min_samples_leaf=4)
-            model = TwoStageTrAdaBoostR2(base_estimator,
+            base_estimator = M5Prime(max_depth=tree_size)
+            model = TrAdaBoostR2(base_estimator,
                                     n_estimators=n_estimators,
                                     lr=lr)
             model.fit(X_source_train, y_source_train,
@@ -143,7 +143,7 @@ for id in id_list:
             rmse = compute_rmse(preds, y_target_test)
             mae = compute_mae(preds, y_target_test)
             df_exp.loc[len(df_exp)] = [seed, lr, n_estimators, tree_size, rmse, mae]
-            df_exp.to_csv(f'results/two_trada_linear_tree_{id}.csv')
+            df_exp.to_csv(f'results/two_trada_{id}.csv')
 
 
 
