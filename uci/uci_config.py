@@ -33,7 +33,7 @@ param_grid_XGBoost = list(itertools.product(v_list, target_tree_size_list, subsa
 
 #Two-stage TrAdaBoost.R2 configs
 lr_list = [0.1, 0.5, 1.0]
-n_estimators_list = [10, 20, 30, 50, 100]
+n_estimators_list = [10, 20, 30, 50, 100, 150]
 tree_size_list = [1,2,3,4]
 # n_estimators_fs_list = [30]
 # cv_list = [10]
