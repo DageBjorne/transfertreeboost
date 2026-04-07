@@ -33,7 +33,7 @@ for seed in c.seed_list:
         n_features=10,
         random_seed=seed + 10)  #do NOT add noise to test set!!!!
     X_target_train, y_target_train = friedman1(
-        n_samples=150,
+        n_samples=300,
         add_noise=False,
         noise_distribution='gaussian',
         n_features=10,
@@ -43,7 +43,7 @@ for seed in c.seed_list:
         
     
         X_source_train, y_source_train = friedman1_altered(
-            n_samples=500,
+            n_samples=1000,
             add_noise=False,
             noise_distribution='gaussian',
             n_features=10,
