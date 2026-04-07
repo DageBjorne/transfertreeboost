@@ -108,7 +108,8 @@ for id in id_list:
         ###########################################################
 
         ### Split data into train/test only for Trada!! (at least for now)
-        data_train, data_test = train_test_split(data_target, test_size=0.2, random_state=seed)
+        data_temp, data_test = train_test_split(data_target, test_size=0.2, random_state=seed)
+        data_train, data_val = train_test_split(data_temp, test_size=0.25, random_state = 3)
 
         X_source_train = np.array(data_source[predictor_columns])
         y_source_train = np.array(data_source[target_column]) 
@@ -138,7 +139,7 @@ for id in id_list:
                                     lr=lr)
             model.fit(X_source_train, y_source_train,
                         X_target_train, y_target_train)
-            preds = model.predict(X_target_test)
+            preds = model.predict(X_target_test).ravel()
 
             rmse = compute_rmse(preds, y_target_test)
             mae = compute_mae(preds, y_target_test)
