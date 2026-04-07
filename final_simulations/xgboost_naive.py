@@ -33,7 +33,7 @@ for seed in c.seed_list:
         n_features=10,
         random_seed=seed + 10)  #do NOT add noise to test set!!!!
     X_target_train_, y_target_train = friedman1(
-        n_samples=200,
+        n_samples=300,
         add_noise=False,
         noise_distribution='gaussian',
         n_features=10,
@@ -96,7 +96,7 @@ for seed in c.seed_list:
             val_mae = compute_mae(val_preds, y_target_val)
             df.loc[len(df)] = [seed, d, v, target_tree_size, 
                                         val_rmse, val_mae, rmse, mae]
-            df.to_csv(f'results_200/xgb_naive.csv')
+            df.to_csv(f'results_300/xgb_naive.csv')
 
 
 
