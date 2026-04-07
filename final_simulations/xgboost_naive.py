@@ -43,7 +43,7 @@ for seed in c.seed_list:
         
     
         X_source_train_, y_source_train = friedman1_altered(
-            n_samples=300,
+            n_samples=500,
             add_noise=False,
             noise_distribution='gaussian',
             n_features=10,
@@ -86,7 +86,7 @@ for seed in c.seed_list:
             'eval_metric': 'rmse',           # RMSE as evaluation metric
             }
                 
-            bst = train_xgboost(X_target_comb, y_target_comb, X_target_val, y_target_val, boosting_rounds=400, 
+            bst = train_xgboost(X_target_comb, y_target_comb, X_target_val, y_target_val, boosting_rounds=1000, 
                                 params=params, early_stopping_rounds=5, show_curve=False)
             preds = test_xgboost(X_target_test, bst)
             val_preds = test_xgboost(X_target_val, bst)
