@@ -146,7 +146,7 @@ for id in id_list:
             rmse = compute_rmse(preds, y_target_test)
             mae = compute_mae(preds, y_target_test)
             df_exp.loc[len(df_exp)] = [seed, lr, n_estimators, tree_size, rmse, mae]
-            df_exp.to_csv(f'results/two_trada_actual{id}.csv')
+            df_exp.to_csv(f'results/two_trada_actual_{id}.csv')
 
 
 
