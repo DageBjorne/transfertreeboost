@@ -134,7 +134,7 @@ for id in id_list:
             #     max_depth=tree_size
             # )
             base_estimator = M5Prime(max_depth=tree_size)
-            model = TwoStageTrAdaBoostR2(base_estimator, #or TrAdaBoostR2 for normal tradaboost
+            model = TrAdaBoostR2(base_estimator, #or TrAdaBoostR2 for normal tradaboost
                                     n_estimators=n_estimators,
                                     lr=lr)
             model.fit(X_source_train, y_source_train,
@@ -144,7 +144,7 @@ for id in id_list:
             rmse = compute_rmse(preds, y_target_test)
             mae = compute_mae(preds, y_target_test)
             df_exp.loc[len(df_exp)] = [seed, lr, n_estimators, tree_size, rmse, mae]
-            df_exp.to_csv(f'results/two_trada_actual{id}.csv')
+            df_exp.to_csv(f'results/two_trada{id}.csv')
 
 
 
