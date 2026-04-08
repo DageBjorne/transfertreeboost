@@ -19,7 +19,6 @@ from sklearn.linear_model import Ridge
 from baselines import *
 
 from friedman1 import *
-import final_simulations_config as c
   
 
 
@@ -68,12 +67,13 @@ for seed in c.seed_list:
             # )
             #base_estimator = DecisionTreeRegressor(max_depth=tree_size)
             base_estimator = M5Prime(max_depth=tree_size)
-            model = TrAdaBoostR2(base_estimator,
+            model = TwoStageTrAdaBoostR2(base_estimator,
                                     n_estimators=n_estimators,
                                     lr=lr)
             model.fit(X_source_train, y_source_train,
                         X_target_train, y_target_train)
             preds = model.predict(X_target_test).ravel()
+            print(preds)
             
 
             rmse = compute_rmse(preds, y_target_test)
