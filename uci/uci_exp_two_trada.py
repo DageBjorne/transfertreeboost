@@ -137,8 +137,8 @@ for id in id_list:
             model = TwoStageTrAdaBoostR2(base_estimator, #or TrAdaBoostR2 for normal tradaboost
                                     n_estimators=n_estimators,
                                     lr=lr,
-                                    n_estimators_fs=30,
-                                    cv=10)
+                                    n_estimators_fs=10,
+                                    cv=5)
             model.fit(X_source_train, y_source_train,
                         X_target_train, y_target_train)
             preds = model.predict(X_target_test).ravel()
