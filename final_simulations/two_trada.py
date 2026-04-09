@@ -67,19 +67,19 @@ for seed in c.seed_list:
             # )
             #base_estimator = DecisionTreeRegressor(max_depth=tree_size)
             base_estimator = M5Prime(max_depth=tree_size)
-            model = TwoStageTrAdaBoostR2(base_estimator,
+            model = TrAdaBoostR2(base_estimator,
                                     n_estimators=n_estimators,
                                     lr=lr)
             model.fit(X_source_train, y_source_train,
                         X_target_train, y_target_train)
             preds = model.predict(X_target_test).ravel()
-            print(preds)
+            print(type(preds))
             
 
             rmse = compute_rmse(preds, y_target_test)
             mae = compute_mae(preds, y_target_test)
             df.loc[len(df)] = [seed, d, lr, n_estimators, tree_size, rmse, mae]
-            df.to_csv(f'results_200/two_trada.csv')
+            df.to_csv(f'results_200/two_trada_test.csv')
 
 
 
