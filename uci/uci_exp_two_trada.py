@@ -133,20 +133,25 @@ for id in id_list:
             #     base_estimator=LinearRegression(),
             #     max_depth=tree_size
             # )
-            base_estimator = M5Prime(max_depth=tree_size)
-            model = TwoStageTrAdaBoostR2(base_estimator, #or TrAdaBoostR2 for normal tradaboost
-                                    n_estimators=n_estimators,
-                                    lr=lr,
-                                    n_estimators_fs=10,
-                                    cv=5)
-            model.fit(X_source_train, y_source_train,
-                        X_target_train, y_target_train)
-            preds = model.predict(X_target_test).ravel()
+            try:
+                base_estimator = M5Prime(max_depth=tree_size)
+                model = TwoStageTrAdaBoostR2(base_estimator, #or TrAdaBoostR2 for normal tradaboost
+                                        n_estimators=n_estimators,
+                                        lr=lr,
+                                        n_estimators_fs=10,
+                                        cv=5)
+                model.fit(X_source_train, y_source_train,
+                            X_target_train, y_target_train)
+                preds = model.predict(X_target_test).ravel()
 
-            rmse = compute_rmse(preds, y_target_test)
-            mae = compute_mae(preds, y_target_test)
-            df_exp.loc[len(df_exp)] = [seed, lr, n_estimators, tree_size, rmse, mae]
-            df_exp.to_csv(f'results/two_trada_actual_{id}.csv')
+                rmse = compute_rmse(preds, y_target_test)
+                mae = compute_mae(preds, y_target_test)
+                df_exp.loc[len(df_exp)] = [seed, lr, n_estimators, tree_size, rmse, mae]
+                df_exp.to_csv(f'results/two_trada_actual_{id}.csv')
+            except:
+                df_exp.loc[len(df_exp)] = [seed, lr, n_estimators, tree_size, 1000, 1000]
+                df_exp.to_csv(f'results/two_trada_actual_{id}.csv')
+
 
 
 
