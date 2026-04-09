@@ -3,22 +3,20 @@ sys.path.append('../')
 import pandas as pd
 from sklearn.model_selection import train_test_split
 import numpy as np
-from utils import *  #only needed for xgboost
+from friedman1 import *
+from utils import *
+
 import final_simulations_config as c
+from sklearn.metrics import mean_squared_error, mean_absolute_error
+
 
 import warnings
 warnings.filterwarnings('ignore')
-from adapt.instance_based import TrAdaBoostR2
+from adapt.instance_based import TrAdaBoostR2, TwoStageTrAdaBoostR2
 from m5py import M5Prime
 
-from lineartree import LinearTreeRegressor
-from sklearn.linear_model import LinearRegression
-from sklearn.linear_model import Ridge
 
 
-from baselines import *
-
-from friedman1 import *
   
 
 
@@ -65,21 +63,25 @@ for seed in c.seed_list:
             #     base_estimator=LinearRegression(),
             #     max_depth=tree_size
             # )
-            #base_estimator = DecisionTreeRegressor(max_depth=tree_size)
+
             base_estimator = M5Prime(max_depth=tree_size)
-            model = TrAdaBoostR2(base_estimator,
+            model = TwoStageTrAdaBoostR2(base_estimator,
                                     n_estimators=n_estimators,
-                                    lr=lr)
+                                    lr=lr,
+                                    n_estimators_fs=10,
+                                    cv=5)
+
             model.fit(X_source_train, y_source_train,
                         X_target_train, y_target_train)
             preds = model.predict(X_target_test).ravel()
-            print(type(preds))
+            print(preds.shape, y_target_test.shape)
             
-
-            rmse = compute_rmse(preds, y_target_test)
-            mae = compute_mae(preds, y_target_test)
+           # rmse = np.sqrt(mean_squared_error(y_target_test, preds))
+            rmse = np.sqrt(np.mean((preds - y_target_test)**2))
+            #rmse = compute_rmse(preds, y_target_test)
+            mae = mean_absolute_error(y_target_test, preds)
             df.loc[len(df)] = [seed, d, lr, n_estimators, tree_size, rmse, mae]
-            df.to_csv(f'results_200/two_trada_test.csv')
+            df.to_csv(f'results_200/two_trada_actual.csv')
 
 
 
