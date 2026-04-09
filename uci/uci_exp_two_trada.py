@@ -151,6 +151,7 @@ for id in id_list:
             except:
                 df_exp.loc[len(df_exp)] = [seed, lr, n_estimators, tree_size, 1000, 1000]
                 df_exp.to_csv(f'results/two_trada_actual_{id}.csv')
+                
 
 
 
