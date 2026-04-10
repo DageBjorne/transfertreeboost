@@ -47,7 +47,7 @@ for seed in c.seed_list:
         
     
         X_source_train, y_source_train = friedman1_altered(
-            n_samples=1000,
+            n_samples=200,
             add_noise=False,
             noise_distribution='gaussian',
             n_features=10,
@@ -65,11 +65,12 @@ for seed in c.seed_list:
             # )
 
             base_estimator = M5Prime(max_depth=tree_size)
-            model = TwoStageTrAdaBoostR2(base_estimator,
+            model = TrAdaBoostR2(base_estimator,
                                     n_estimators=n_estimators,
                                     lr=lr,
-                                    n_estimators_fs=10,
-                                    cv=5)
+                                    #n_estimators_fs=10,
+                                    #cv=5)
+            )
 
             model.fit(X_source_train, y_source_train,
                         X_target_train, y_target_train)
@@ -81,7 +82,7 @@ for seed in c.seed_list:
             #rmse = compute_rmse(preds, y_target_test)
             mae = mean_absolute_error(y_target_test, preds)
             df.loc[len(df)] = [seed, d, lr, n_estimators, tree_size, rmse, mae]
-            df.to_csv(f'results_200/two_trada_actual.csv')
+            df.to_csv(f'results_200/two_trada_200.csv')
 
 
 
