@@ -1,7 +1,7 @@
 import sys
 
 sys.path.append('../')
-from core import  LSTransferTreeBoost # for simplicity we will work only with M
+from core import  LSTransferTreeBoost # we will work with LS
 import pandas as pd
 from sklearn.model_selection import train_test_split
 import numpy as np

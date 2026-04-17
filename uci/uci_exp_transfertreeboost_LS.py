@@ -1,7 +1,7 @@
 import sys
 
 sys.path.append('../')
-from core import  LSTransferTreeBoost # for simplicity we will work only with M
+from core import  LSTransferTreeBoost # We will work with LS
 import pandas as pd
 from sklearn.model_selection import train_test_split
 import numpy as np
@@ -135,7 +135,7 @@ for id in id_list:
             val_mae = fiter.evaluate(X_target_val, y_target_val, metric = 'mae')
             df_exp.loc[len(df_exp)] = [seed, v, source_tree_size, target_tree_size, k, m_0, epochs, 
                                                             val_rmse, val_mae, rmse, mae]
-            df_exp.to_csv(f'results_new/ttb_LS_{id}.csv')
+            df_exp.to_csv(f'results/ttb_LS_{id}.csv')
 
 
 

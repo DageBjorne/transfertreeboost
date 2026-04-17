@@ -12,7 +12,7 @@ from sklearn.metrics import mean_squared_error, mean_absolute_error
 
 import warnings
 warnings.filterwarnings('ignore')
-from adapt.instance_based import TrAdaBoostR2, TwoStageTrAdaBoostR2
+from adapt.instance_based import TrAdaBoostR2
 from m5py import M5Prime
 
 
@@ -82,7 +82,7 @@ for seed in c.seed_list:
             #rmse = compute_rmse(preds, y_target_test)
             mae = mean_absolute_error(y_target_test, preds)
             df.loc[len(df)] = [seed, d, lr, n_estimators, tree_size, rmse, mae]
-            df.to_csv(f'results_200/two_trada_200.csv')
+            df.to_csv(f'results_200/trada.csv')
 
 
 

@@ -8,12 +8,8 @@ import uci_config as c
 
 import warnings
 warnings.filterwarnings('ignore')
-from adapt.instance_based import TrAdaBoostR2, TwoStageTrAdaBoostR2
+from adapt.instance_based import TrAdaBoostR2
 from m5py import M5Prime
-
-from lineartree import LinearTreeRegressor
-from sklearn.linear_model import LinearRegression
-from sklearn.linear_model import Ridge
 
 
 from baselines import *
@@ -128,30 +124,24 @@ for id in id_list:
 
         for config in c.param_grid_TwoTrada:
             lr, n_estimators, tree_size = config
-            #base_estimator = M5Prime()
-            # base_estimator = LinearTreeRegressor(
-            #     base_estimator=LinearRegression(),
-            #     max_depth=tree_size
-            # )
-            try:
-                base_estimator = M5Prime(max_depth=tree_size)
-                model = TwoStageTrAdaBoostR2(base_estimator, #or TrAdaBoostR2 for normal tradaboost
-                                        n_estimators=n_estimators,
-                                        lr=lr,
-                                        n_estimators_fs=10,
-                                        cv=5)
-                model.fit(X_source_train, y_source_train,
-                            X_target_train, y_target_train)
-                preds = model.predict(X_target_test).ravel()
-                print(preds.shape, y_target_test.shape)
 
-                rmse = compute_rmse(preds, y_target_test)
-                mae = compute_mae(preds, y_target_test)
-                df_exp.loc[len(df_exp)] = [seed, lr, n_estimators, tree_size, rmse, mae]
-                #df_exp.to_csv(f'results/two_trada_actual_{id}.csv')
-            except:
-                df_exp.loc[len(df_exp)] = [seed, lr, n_estimators, tree_size, 1000, 1000]
-                #df_exp.to_csv(f'results/two_trada_actual_{id}.csv')
+    
+            base_estimator = M5Prime(max_depth=tree_size)
+            model = TrAdaBoostR2(base_estimator, #or TrAdaBoostR2 for normal tradaboost
+                                    n_estimators=n_estimators,
+                                    lr=lr,
+                                    )
+            model.fit(X_source_train, y_source_train,
+                        X_target_train, y_target_train)
+            preds = model.predict(X_target_test).ravel()
+            print(preds.shape, y_target_test.shape)
+
+            rmse = compute_rmse(preds, y_target_test)
+            mae = compute_mae(preds, y_target_test)
+            df_exp.loc[len(df_exp)] = [seed, lr, n_estimators, tree_size, rmse, mae]
+            df_exp.to_csv(f'results/trada_{id}.csv')
+
+
                 
 
 

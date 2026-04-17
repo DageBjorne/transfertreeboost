@@ -162,7 +162,7 @@ for id in id_list:
             val_mae = compute_mae(val_preds, y_target_val)
             df_exp.loc[len(df_exp)] = [seed, v, target_tree_size,
                                         val_rmse, val_mae, rmse, mae]
-            df_exp.to_csv(f'results_new/xgb_naive_{id}.csv')
+            df_exp.to_csv(f'results/xgb_naive_{id}.csv')
 
 
 

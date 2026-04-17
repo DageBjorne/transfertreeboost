@@ -1,7 +1,3 @@
-import sys
-
-sys.path.append('../')
-from core import  MTransferTreeBoost # for simplicity we will work only with M
 import pandas as pd
 from sklearn.model_selection import train_test_split
 import numpy as np
@@ -141,7 +137,7 @@ for id in id_list:
             val_mae = compute_mae(val_preds, y_target_val)
             df_exp.loc[len(df_exp)] = [seed, v, target_tree_size, 
                                         val_rmse, val_mae, rmse, mae]
-            df_exp.to_csv(f'results_new/xgb_{id}.csv')
+            df_exp.to_csv(f'results/xgb_{id}.csv')
 
 
 
