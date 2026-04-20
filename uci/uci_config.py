@@ -41,3 +41,10 @@ cv_list = [5] #only for two-stage
 param_grid_TwoTrada = list(itertools.product(lr_list, 
                                              n_estimators_list,
                                              tree_size_list))
+
+#MLP configs
+learning_rate_list = [1e-3, 5e-4, 1e-4, 5e-5, 1e-5]
+dropout_list = [0.0, 0.1, 0.2]
+
+param_grid_MLP= list(itertools.product(learning_rate_list, 
+                                             dropout_list))
