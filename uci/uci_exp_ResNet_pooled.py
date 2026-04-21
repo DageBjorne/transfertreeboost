@@ -145,4 +145,4 @@ for dataset_id in id_list:
             val_rmse, val_mae = test_final_mlp(dataloader_test=val_dataloader, mlp=resnet)
             
             df_exp.loc[len(df_exp)] = [seed, learning_rate, dropout, d_main, num_blocks, val_rmse, val_mae, rmse, mae]
-            df_exp.to_csv(f'results/ResNet_pooled_{dataset_id}.csv', index=False)
+            df_exp.to_csv(f'results/ResNet_pooled2_{dataset_id}.csv', index=False)
