@@ -63,7 +63,7 @@ data_source = data[data['Species'] == 'Pine']
 # data_target = data[data['Lat'] < q3]
 
 X_source_train = np.array(data_source[c.predictor_columns])
-y_source_train = np.array(data_source[c.target_column]) #change this to "Height" to use Height as source label!
+y_source_train = np.array(data_source["Height"]) #change this to "Height" to use Height as source label!
 
 for config in c.param_grid_ResNet:
     learning_rate, dropout, d_main, num_blocks = config
@@ -113,6 +113,6 @@ for config in c.param_grid_ResNet:
         val_rmse, val_mae = test_final_mlp(dataloader_test=val_dataloader, mlp=resnet_finetuned)
         
         df_exp.loc[len(df_exp)] = [seed, learning_rate, dropout, d_main, num_blocks, val_rmse, val_mae, rmse, mae]
-        df_exp.to_csv(f'results_species/ResNet_finetuned2.csv', index=False)
+        df_exp.to_csv(f'results_height/ResNet_finetuned2.csv', index=False)
 
 

@@ -53,14 +53,14 @@ class TabularResNet(nn.Module):
 df_exp = pd.DataFrame(columns=['seed', 'learning_rate', 'dropout', 'd_main', 'num_blocks', 'val_rmse', 'val_mae', 'rmse', 'mae'])
 
 # data (as pandas dataframes) 
-data_target = pd.read_csv('../datasets/rs_lettland.csv')[0:300]
-data_source = pd.read_csv('../datasets/rs_sweden.csv')[0:2000]
-
-# #split according to latitude
 # data_target = pd.read_csv('../datasets/rs_lettland.csv')[0:300]
-# data_source = pd.read_csv('../datasets/rs_sweden.csv')
-# q3 = np.percentile(data_source.copy()['north_processed'], 75)
-# data_source = data_source[data_source['north_processed'] >= q3][0:2000]
+# data_source = pd.read_csv('../datasets/rs_sweden.csv')[0:2000]
+
+#split according to latitude
+data_target = pd.read_csv('../datasets/rs_lettland.csv')[0:300]
+data_source = pd.read_csv('../datasets/rs_sweden.csv')
+q3 = np.percentile(data_source.copy()['north_processed'], 75)
+data_source = data_source[data_source['north_processed'] >= q3][0:2000]
 
 X_source_train = np.array(data_source[c.predictor_columns])
 y_source_train = np.array(data_source[c.target_column]) #change this to "Height" to use Height as source label!
@@ -113,6 +113,6 @@ for config in c.param_grid_ResNet:
         val_rmse, val_mae = test_final_mlp(dataloader_test=val_dataloader, mlp=resnet_finetuned)
         
         df_exp.loc[len(df_exp)] = [seed, learning_rate, dropout, d_main, num_blocks, val_rmse, val_mae, rmse, mae]
-        df_exp.to_csv(f'results_normal/ResNet_finetuned2.csv', index=False)
+        df_exp.to_csv(f'results_location/ResNet_finetuned2.csv', index=False)
 
 
