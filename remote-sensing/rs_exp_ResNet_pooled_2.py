@@ -6,7 +6,7 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 import numpy as np
 from utils import *  #only needed for xgboost
-import stem_config as c
+import rs_config as c
 import torch
 import torch.nn as nn
 import copy
@@ -53,14 +53,14 @@ class TabularResNet(nn.Module):
 df_exp = pd.DataFrame(columns=['seed', 'learning_rate', 'dropout', 'd_main', 'num_blocks', 'val_rmse', 'val_mae', 'rmse', 'mae'])
 
 # data (as pandas dataframes) 
-data = pd.read_csv('../datasets/stem_data.csv')
-data_target = data[data['Species'] == 'Spruce']
-data_source = data[data['Species'] == 'Pine']
+# data_target = pd.read_csv('../datasets/rs_lettland.csv')[0:300]
+# data_source = pd.read_csv('../datasets/rs_sweden.csv')[0:2000]
 
-# #split according to latitude
-# q3 = np.percentile(data.copy()['Lat'], 25)
-# data_source = data[data['Lat'] >= q3]
-# data_target = data[data['Lat'] < q3]
+#split according to latitude
+data_target = pd.read_csv('../datasets/rs_lettland.csv')[0:300]
+data_source = pd.read_csv('../datasets/rs_sweden.csv')
+q3 = np.percentile(data_source.copy()['north_processed'], 75)
+data_source = data_source[data_source['north_processed'] >= q3][0:2000]
 
 X_source_train = np.array(data_source[c.predictor_columns])
 y_source_train = np.array(data_source[c.target_column]) #change this to "Height" to use Height as source label!
@@ -116,6 +116,6 @@ for config in c.param_grid_ResNet:
         val_rmse, val_mae = test_final_mlp(dataloader_test=val_dataloader, mlp=resnet)
         
         df_exp.loc[len(df_exp)] = [seed, learning_rate, dropout, d_main, num_blocks, val_rmse, val_mae, rmse, mae]
-        df_exp.to_csv(f'results_species/ResNet_pooled2.csv', index=False)
+        df_exp.to_csv(f'results_location/ResNet_pooled2.csv', index=False)
 
 
