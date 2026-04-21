@@ -49,7 +49,8 @@ class TabularResNet(nn.Module):
             x = block(x)
         return self.head(x)
 
-id_list = [9, 291]
+id_list = [925, 165, 477, 162] #InfraRed = 925, concrete = 165, Auto MPG = 9, 
+        #Real estate valuation = 477, Air-foil self-noise = 291, forest fires = 162
 
 for dataset_id in id_list:
     df_exp = pd.DataFrame(columns=['seed', 'learning_rate', 'dropout', 'd_main', 'num_blocks', 'val_rmse', 'val_mae', 'rmse', 'mae'])
