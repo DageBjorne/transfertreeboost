@@ -54,13 +54,13 @@ df_exp = pd.DataFrame(columns=['seed', 'learning_rate', 'dropout', 'd_main', 'nu
 
 # data (as pandas dataframes) 
 data = pd.read_csv('../datasets/stem_data.csv')
-# data_target = data[data['Species'] == 'Spruce']
-# data_source = data[data['Species'] == 'Pine']
+data_target = data[data['Species'] == 'Spruce']
+data_source = data[data['Species'] == 'Pine']
 
-#split according to latitude
-q3 = np.percentile(data.copy()['Lat'], 25)
-data_source = data[data['Lat'] >= q3]
-data_target = data[data['Lat'] < q3]
+# #split according to latitude
+# q3 = np.percentile(data.copy()['Lat'], 25)
+# data_source = data[data['Lat'] >= q3]
+# data_target = data[data['Lat'] < q3]
 
 X_source_train = np.array(data_source[c.predictor_columns])
 y_source_train = np.array(data_source[c.target_column]) #change this to "Height" to use Height as source label!
@@ -116,6 +116,6 @@ for config in c.param_grid_ResNet:
         val_rmse, val_mae = test_final_mlp(dataloader_test=val_dataloader, mlp=resnet)
         
         df_exp.loc[len(df_exp)] = [seed, learning_rate, dropout, d_main, num_blocks, val_rmse, val_mae, rmse, mae]
-        df_exp.to_csv(f'results_location/ResNet_pooled2.csv', index=False)
+        df_exp.to_csv(f'results_species/ResNet_pooled2.csv', index=False)
 
 
