@@ -64,6 +64,7 @@ data_source = data[data['Species'] == 'Pine']
 
 X_source_train = np.array(data_source[c.predictor_columns])
 y_source_train = np.array(data_source["Height"]) #change this to "Height" to use Height as source label!
+y_source_train = (y_source_train - np.mean(y_source_train)) / np.std(y_source_train)
 
 for config in c.param_grid_ResNet:
     learning_rate, dropout, d_main, num_blocks = config
@@ -98,21 +99,30 @@ for config in c.param_grid_ResNet:
 
         X_target_train = np.array(data_train[c.predictor_columns])
         y_target_train = np.array(data_train[c.target_column])
+        #normalize
+        y_target_train = (y_target_train - np.mean(y_source_train)) / np.std(y_source_train)
         X_target_val = np.array(data_val[c.predictor_columns])
         y_target_val = np.array(data_val[c.target_column])
+        y_target_val = (y_target_val - np.mean(y_source_train)) / np.std(y_source_train)
         X_target_test = np.array(data_test[c.predictor_columns])
         y_target_test = np.array(data_test[c.target_column])
+        y_target_test_orig = y_target_test
+        y_target_test = (y_target_test - np.mean(y_source_train)) / np.std(y_source_train)
         
         train_dataloader, val_dataloader, test_dataloader = process_datasets_for_finetuning(
             X_target_train, y_target_train, X_target_val, y_target_val, X_target_test, y_target_test, batch_size=16
         )
+
+        _, _, test_dataloader_orig = process_datasets_for_finetuning(
+            X_target_train, y_target_train, X_target_val, y_target_val, X_target_test, y_target_test_orig, batch_size=16
+        )
         
         resnet_finetuned, train_loss_tgt, val_loss_tgt = finetune_mlp_on_target(train_dataloader, val_dataloader, resnet_finetuned, epochs=1000, learning_rate=learning_rate)
         
-        rmse, mae = test_final_mlp(dataloader_test=test_dataloader, mlp=resnet_finetuned)
+        rmse, mae = test_final_mlp(dataloader_test=test_dataloader_orig, mlp=resnet_finetuned)
         val_rmse, val_mae = test_final_mlp(dataloader_test=val_dataloader, mlp=resnet_finetuned)
         
         df_exp.loc[len(df_exp)] = [seed, learning_rate, dropout, d_main, num_blocks, val_rmse, val_mae, rmse, mae]
-        df_exp.to_csv(f'results_height/ResNet_finetuned2.csv', index=False)
+        df_exp.to_csv(f'results_height/ResNet_finetuned3.csv', index=False)
 
 
