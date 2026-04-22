@@ -106,7 +106,7 @@ for config in c.param_grid_ResNet:
         X_target_test_scaled = feature_scaler.transform(X_target_test_raw)
 
         target_scaler = StandardScaler()
-        y_train_comb_scaled = target_scaler.fit_transform(y_train_comb_raw).flatten()
+        y_train_comb_scaled = target_scaler.fit_transform(y_train_comb_raw.reshape(-1, 1)).flatten()
         y_target_val_scaled = target_scaler.transform(y_target_val_raw.reshape(-1, 1)).flatten()
         y_target_test_scaled = target_scaler.transform(y_target_test_raw.reshape(-1, 1)).flatten()
 

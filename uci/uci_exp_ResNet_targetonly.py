@@ -140,7 +140,8 @@ for dataset_id in uci_dataset_ids:
         X_target_test_scaled = feature_scaler.transform(X_target_test)
 
         target_scaler = StandardScaler()
-        y_train_comb_scaled = target_scaler.fit_transform(y_train_comb_raw).flatten()
+        #y_train_comb_scaled = target_scaler.fit_transform(y_train_comb_raw).flatten()
+        y_train_comb_scaled = target_scaler.fit_transform(y_train_comb_raw.reshape(-1, 1)).flatten()
         y_target_val_scaled = target_scaler.transform(y_target_val.reshape(-1, 1)).flatten()
         y_target_test_scaled = target_scaler.transform(y_target_test.reshape(-1, 1)).flatten()
 
