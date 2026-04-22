@@ -1,16 +1,18 @@
 import sys
-
 sys.path.append('../')
-from baselines import *
+
 import pandas as pd
-from sklearn.model_selection import train_test_split
 import numpy as np
-from utils import *  #only needed for xgboost
-import rs_config as c
 import torch
 import torch.nn as nn
-import copy
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import root_mean_squared_error, mean_absolute_error
 
+from baselines import *
+from utils import *
+import rs_config as c
+import copy
 
 # NOTE: Architecture based on "Revisiting Deep Learning Models for Tabular Data" (Gorishniy et al., 2021).
 class ResNetBlock(nn.Module):
@@ -48,13 +50,31 @@ class TabularResNet(nn.Module):
         for block in self.blocks:
             x = block(x)
         return self.head(x)
+
+def calculate_raw_metrics(model, dataloader, target_scaler):
+    model.eval()
+    preds_scaled, targets_scaled = [], []
+    with torch.no_grad():
+        for x_batch, y_batch in dataloader:
+            preds_scaled.append(model(x_batch).detach().cpu().numpy())
+            targets_scaled.append(y_batch.detach().cpu().numpy())
+            
+    preds_scaled = np.concatenate(preds_scaled).reshape(-1, 1)
+    targets_scaled = np.concatenate(targets_scaled).reshape(-1, 1)
     
+    preds_raw = target_scaler.inverse_transform(preds_scaled)
+    targets_raw = target_scaler.inverse_transform(targets_scaled)
+    
+    rmse_raw = root_mean_squared_error(targets_raw, preds_raw)
+    mae_raw = mean_absolute_error(targets_raw, preds_raw)
+    return rmse_raw, mae_raw
 
-df_exp = pd.DataFrame(columns=['seed', 'learning_rate', 'dropout', 'd_main', 'num_blocks', 'val_rmse', 'val_mae', 'rmse', 'mae'])
-
-# data (as pandas dataframes) 
-data_target = pd.read_csv('../datasets/rs_lettland.csv')[0:300]
-data_source = pd.read_csv('../datasets/rs_sweden.csv')[0:2000]
+log_columns = [
+    'seed', 'learning_rate', 'dropout', 'd_main', 'num_blocks', 
+    'val_rmse_scaled', 'val_mae_scaled', 'val_rmse_raw', 'val_mae_raw', 
+    'test_rmse_scaled', 'test_mae_scaled', 'test_rmse_raw', 'test_mae_raw'
+]
+results_df = pd.DataFrame(columns=log_columns)
 
 # #split according to latitude
 # data_target = pd.read_csv('../datasets/rs_lettland.csv')[0:300]
@@ -62,30 +82,38 @@ data_source = pd.read_csv('../datasets/rs_sweden.csv')[0:2000]
 # q3 = np.percentile(data_source.copy()['north_processed'], 75)
 # data_source = data_source[data_source['north_processed'] >= q3][0:2000]
 
-X_source_train = np.array(data_source[c.predictor_columns])
-y_source_train = np.array(data_source[c.target_column]) #change this to "Height" to use Height as source label!
+data_target = pd.read_csv('../datasets/rs_lettland.csv')[0:300]
+data_source = pd.read_csv('../datasets/rs_sweden.csv')[0:2000]
+
+X_source_train_raw = data_source[c.predictor_columns].to_numpy()
+y_source_train_raw = data_source[c.target_column].to_numpy() # change to Volume
+
+# Standardize based on the source domain exclusively to preserve feature space alignment during transfer
+feature_scaler = StandardScaler()
+X_source_train_scaled = feature_scaler.fit_transform(X_source_train_raw)
+
+target_scaler = StandardScaler()
+y_source_train_scaled = target_scaler.fit_transform(y_source_train_raw.reshape(-1, 1)).flatten()
 
 for config in c.param_grid_ResNet:
     learning_rate, dropout, d_main, num_blocks = config
     
     resnet_base = TabularResNet(
-        input_size=X_source_train.shape[1], 
+        input_size=X_source_train_scaled.shape[1], 
         d_main=d_main, 
         d_hidden=d_main * 2, 
         num_blocks=num_blocks, 
         dropout_rate=dropout
     )
     
-    dataloader_train_source = process_dataset_for_base_network(X_source_train, y_source_train, batch_size=16)
-    
+    dataloader_train_source = process_dataset_for_base_network(X_source_train_scaled, y_source_train_scaled, batch_size=16)
     resnet_base, train_loss_src, val_loss_src = train_mlp_on_source(dataloader_train_source, resnet_base, learning_rate=learning_rate, epochs=1000)
     
-    # NOTE: Deepcopy used to ensure the base state remains pristine across seed iterations
     base_state_dict = copy.deepcopy(resnet_base.state_dict())
 
     for seed in c.seed_list:
         resnet_finetuned = TabularResNet(
-            input_size=X_source_train.shape[1], 
+            input_size=X_source_train_scaled.shape[1], 
             d_main=d_main, 
             d_hidden=d_main * 2, 
             num_blocks=num_blocks, 
@@ -96,23 +124,41 @@ for config in c.param_grid_ResNet:
         data_temp, data_test = train_test_split(data_target, test_size=0.2, random_state=seed)
         data_train, data_val = train_test_split(data_temp, test_size=0.25, random_state=3)
 
-        X_target_train = np.array(data_train[c.predictor_columns])
-        y_target_train = np.array(data_train[c.target_column])
-        X_target_val = np.array(data_val[c.predictor_columns])
-        y_target_val = np.array(data_val[c.target_column])
-        X_target_test = np.array(data_test[c.predictor_columns])
-        y_target_test = np.array(data_test[c.target_column])
+        X_target_train_raw = data_train[c.predictor_columns].to_numpy()
+        y_target_train_raw = data_train[c.target_column].to_numpy()
+        X_target_val_raw = data_val[c.predictor_columns].to_numpy()
+        y_target_val_raw = data_val[c.target_column].to_numpy()
+        X_target_test_raw = data_test[c.predictor_columns].to_numpy()
+        y_target_test_raw = data_test[c.target_column].to_numpy()
+
+        # Transform target data using the source scalers
+        X_target_train_scaled = feature_scaler.transform(X_target_train_raw)
+        X_target_val_scaled = feature_scaler.transform(X_target_val_raw)
+        X_target_test_scaled = feature_scaler.transform(X_target_test_raw)
+
+        y_target_train_scaled = target_scaler.transform(y_target_train_raw.reshape(-1, 1)).flatten()
+        y_target_val_scaled = target_scaler.transform(y_target_val_raw.reshape(-1, 1)).flatten()
+        y_target_test_scaled = target_scaler.transform(y_target_test_raw.reshape(-1, 1)).flatten()
         
+        # TODO: Ensure batch_size > 16 if using BatchNorm on very small datasets
         train_dataloader, val_dataloader, test_dataloader = process_datasets_for_finetuning(
-            X_target_train, y_target_train, X_target_val, y_target_val, X_target_test, y_target_test, batch_size=16
+            X_target_train_scaled, y_target_train_scaled, 
+            X_target_val_scaled, y_target_val_scaled, 
+            X_target_test_scaled, y_target_test_scaled, 
+            batch_size=16
         )
         
         resnet_finetuned, train_loss_tgt, val_loss_tgt = finetune_mlp_on_target(train_dataloader, val_dataloader, resnet_finetuned, epochs=1000, learning_rate=learning_rate)
         
-        rmse, mae = test_final_mlp(dataloader_test=test_dataloader, mlp=resnet_finetuned)
-        val_rmse, val_mae = test_final_mlp(dataloader_test=val_dataloader, mlp=resnet_finetuned)
+        test_rmse_scaled, test_mae_scaled = test_final_mlp(dataloader_test=test_dataloader, mlp=resnet_finetuned)
+        val_rmse_scaled, val_mae_scaled = test_final_mlp(dataloader_test=val_dataloader, mlp=resnet_finetuned)
+
+        test_rmse_raw, test_mae_raw = calculate_raw_metrics(resnet_finetuned, test_dataloader, target_scaler)
+        val_rmse_raw, val_mae_raw = calculate_raw_metrics(resnet_finetuned, val_dataloader, target_scaler)
         
-        df_exp.loc[len(df_exp)] = [seed, learning_rate, dropout, d_main, num_blocks, val_rmse, val_mae, rmse, mae]
-        df_exp.to_csv(f'results_normal/ResNet_finetuned2.csv', index=False)
-
-
+        results_df.loc[len(results_df)] = [
+            seed, learning_rate, dropout, d_main, num_blocks, 
+            val_rmse_scaled, val_mae_scaled, val_rmse_raw, val_mae_raw, 
+            test_rmse_scaled, test_mae_scaled, test_rmse_raw, test_mae_raw
+        ]
+        results_df.to_csv('results_normal/ResNet_finetuned_transformed2.csv', index=False)
