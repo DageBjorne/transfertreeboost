@@ -129,6 +129,11 @@ for dataset_id in uci_dataset_ids:
         X_train_comb_raw = np.vstack((X_target_train, X_source_train))
         y_train_comb_raw = np.concatenate((y_target_train, y_source_train)).reshape(-1, 1)
 
+
+        # BILLIG LÖSNING
+        X_train_comb_raw = X_target_train
+        y_train_comb_raw = y_target_train
+
         feature_scaler = StandardScaler()
         X_train_comb_scaled = feature_scaler.fit_transform(X_train_comb_raw)
         X_target_val_scaled = feature_scaler.transform(X_target_val)
@@ -139,23 +144,24 @@ for dataset_id in uci_dataset_ids:
         y_target_val_scaled = target_scaler.transform(y_target_val.reshape(-1, 1)).flatten()
         y_target_test_scaled = target_scaler.transform(y_target_test.reshape(-1, 1)).flatten()
 
-        target_train_indicator = np.ones((X_target_train.shape[0], 1))
-        source_indicator = np.zeros((X_source_train.shape[0], 1))
-        train_comb_indicator = np.vstack((target_train_indicator, source_indicator))
+        #target_train_indicator = np.ones((X_target_train.shape[0], 1))
+        #source_indicator = np.zeros((X_source_train.shape[0], 1))
+        #train_comb_indicator = np.vstack((target_train_indicator, source_indicator))
         
-        X_train_comb_final = np.hstack((X_train_comb_scaled, train_comb_indicator))
+        #X_train_comb_final = np.hstack((X_train_comb_scaled, train_comb_indicator))
+        #X_train_comb_final = X_target_train
         
-        val_indicator = np.ones((X_target_val_scaled.shape[0], 1))
-        X_target_val_final = np.hstack((X_target_val_scaled, val_indicator))
+        #val_indicator = np.ones((X_target_val_scaled.shape[0], 1))
+        #X_target_val_final = np.hstack((X_target_val_scaled, val_indicator))
 
-        test_indicator = np.ones((X_target_test_scaled.shape[0], 1))
-        X_target_test_final = np.hstack((X_target_test_scaled, test_indicator))
+        #test_indicator = np.ones((X_target_test_scaled.shape[0], 1))
+        #X_target_test_final = np.hstack((X_target_test_scaled, test_indicator))
 
         for config in c.param_grid_ResNet:
             learning_rate, dropout, d_main, num_blocks = config
             
             resnet = TabularResNet(
-                input_size=X_train_comb_final.shape[1], 
+                input_size=X_train_comb_scaled.shape[1], 
                 d_main=d_main, 
                 d_hidden=d_main * 2, 
                 num_blocks=num_blocks, 
@@ -164,7 +170,7 @@ for dataset_id in uci_dataset_ids:
         
             # TODO: Ensure batch_size > 16 if using BatchNorm on very small datasets to avoid unstable statistics
             train_dataloader, val_dataloader, test_dataloader = process_datasets_for_finetuning(
-                X_train_comb_final, y_train_comb_scaled, X_target_val_final, y_target_val_scaled, X_target_test_final, y_target_test_scaled, batch_size=16
+                X_train_comb_scaled, y_train_comb_scaled, X_target_val_scaled, y_target_val_scaled, X_target_test_scaled, y_target_test_scaled, batch_size=16
             )
             
             resnet, train_loss, val_loss = finetune_mlp_on_target(train_dataloader, val_dataloader, resnet, epochs=1000, learning_rate=learning_rate)
@@ -180,4 +186,4 @@ for dataset_id in uci_dataset_ids:
                 val_rmse_scaled, val_mae_scaled, val_rmse_raw, val_mae_raw, 
                 test_rmse_scaled, test_mae_scaled, test_rmse_raw, test_mae_raw
             ]
-            results_df.to_csv(f'results/ResNet_pooled3_{dataset_id}.csv', index=False)
+            results_df.to_csv(f'results/ResNet_TARGETONLY_{dataset_id}.csv', index=False)

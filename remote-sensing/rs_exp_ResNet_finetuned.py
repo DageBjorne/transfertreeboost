@@ -75,20 +75,20 @@ log_columns = [
 ]
 results_df = pd.DataFrame(columns=log_columns)
 # #split according to latitude
-# data_target = pd.read_csv('../datasets/rs_lettland.csv')[0:300]
-# data_source = pd.read_csv('../datasets/rs_sweden.csv')[0:2000]
+data_target = pd.read_csv('../datasets/rs_lettland.csv')[0:300]
+data_source = pd.read_csv('../datasets/rs_sweden.csv')[0:2000]
 
 #split according to latitude
-data_target = pd.read_csv('../datasets/rs_lettland.csv')[0:300]
-data_source = pd.read_csv('../datasets/rs_sweden.csv')
-q3 = np.percentile(data_source.copy()['north_processed'], 75)
-data_source = data_source[data_source['north_processed'] >= q3][0:2000]
+#data_target = pd.read_csv('../datasets/rs_lettland.csv')[0:300]
+#data_source = pd.read_csv('../datasets/rs_sweden.csv')
+#q3 = np.percentile(data_source.copy()['north_processed'], 75)
+#data_source = data_source[data_source['north_processed'] >= q3][0:2000]
 
 data_target = pd.read_csv('../datasets/rs_lettland.csv')[0:300]
 data_source = pd.read_csv('../datasets/rs_sweden.csv')[0:2000]
 
 X_source_train_raw = data_source[c.predictor_columns].to_numpy()
-y_source_train_raw = data_source[c.target_column].to_numpy() # change to Volume
+y_source_train_raw = data_source["Volume"].to_numpy() # change to Volume
 
 # Standardize based on the source domain exclusively to preserve feature space alignment during transfer
 feature_scaler_src = StandardScaler()
@@ -163,4 +163,4 @@ for config in c.param_grid_ResNet:
             val_rmse_scaled, val_mae_scaled, val_rmse_raw, val_mae_raw, 
             test_rmse_scaled, test_mae_scaled, test_rmse_raw, test_mae_raw
         ]
-        results_df.to_csv('results_normal/ResNet_finetuned_transformed2.csv', index=False)
+        results_df.to_csv('results_volume/ResNet_finetuned_transformed2.csv', index=False)

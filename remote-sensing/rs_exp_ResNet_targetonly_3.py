@@ -10,7 +10,7 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import root_mean_squared_error, mean_absolute_error
 
 from baselines import *
-from utils import * 
+from utils import *
 import rs_config as c
 import copy
 
@@ -80,7 +80,8 @@ data_target = pd.read_csv('../datasets/rs_lettland.csv')[0:300]
 data_source = pd.read_csv('../datasets/rs_sweden.csv')[0:2000]
 
 X_source_train_raw = data_source[c.predictor_columns].to_numpy()
-y_source_train_raw = data_source[c.target_column].to_numpy()
+# NOTE: Specific target column for the source dataset
+y_source_train_raw = data_source["Volume"].to_numpy()
 
 for config in c.param_grid_ResNet:
     learning_rate, dropout, d_main, num_blocks = config
@@ -96,8 +97,8 @@ for config in c.param_grid_ResNet:
         X_target_test_raw = data_test[c.predictor_columns].to_numpy()
         y_target_test_raw = data_test[c.target_column].to_numpy()
 
-        X_train_comb_raw = np.vstack((X_target_train_raw, X_source_train_raw))
-        y_train_comb_raw = np.concatenate((y_target_train_raw, y_source_train_raw)).reshape(-1, 1)
+        X_train_comb_raw = X_target_train_raw #np.vstack((X_target_train_raw, X_source_train_raw))
+        y_train_comb_raw = y_target_train_raw #np.concatenate((y_target_train_raw, y_source_train_raw)).reshape(-1, 1)
 
         feature_scaler = StandardScaler()
         X_train_comb_scaled = feature_scaler.fit_transform(X_train_comb_raw)
@@ -109,20 +110,20 @@ for config in c.param_grid_ResNet:
         y_target_val_scaled = target_scaler.transform(y_target_val_raw.reshape(-1, 1)).flatten()
         y_target_test_scaled = target_scaler.transform(y_target_test_raw.reshape(-1, 1)).flatten()
 
-        target_train_indicator = np.ones((X_target_train_raw.shape[0], 1))
-        source_train_indicator = np.zeros((X_source_train_raw.shape[0], 1))
-        train_comb_indicator = np.vstack((target_train_indicator, source_train_indicator))
+        #target_train_indicator = np.ones((X_target_train_raw.shape[0], 1))
+        #source_train_indicator = np.zeros((X_source_train_raw.shape[0], 1))
+        #train_comb_indicator = np.vstack((target_train_indicator, source_train_indicator))
         
-        X_train_comb_final = np.hstack((X_train_comb_scaled, train_comb_indicator))
+        #X_train_comb_final = np.hstack((X_train_comb_scaled, train_comb_indicator))
         
-        val_indicator = np.ones((X_target_val_scaled.shape[0], 1))
-        X_target_val_final = np.hstack((X_target_val_scaled, val_indicator))
+        #val_indicator = np.ones((X_target_val_scaled.shape[0], 1))
+        #X_target_val_final = np.hstack((X_target_val_scaled, val_indicator))
 
-        test_indicator = np.ones((X_target_test_scaled.shape[0], 1))
-        X_target_test_final = np.hstack((X_target_test_scaled, test_indicator))
+        #test_indicator = np.ones((X_target_test_scaled.shape[0], 1))
+        #X_target_test_final = np.hstack((X_target_test_scaled, test_indicator))
 
         resnet = TabularResNet(
-            input_size=X_train_comb_final.shape[1], 
+            input_size=X_train_comb_scaled.shape[1], 
             d_main=d_main, 
             d_hidden=d_main * 2, 
             num_blocks=num_blocks, 
@@ -131,9 +132,9 @@ for config in c.param_grid_ResNet:
     
         # TODO: Ensure batch_size > 16 if using BatchNorm on very small datasets
         train_dataloader, val_dataloader, test_dataloader = process_datasets_for_finetuning(
-            X_train_comb_final, y_train_comb_scaled, 
-            X_target_val_final, y_target_val_scaled, 
-            X_target_test_final, y_target_test_scaled, 
+            X_train_comb_scaled, y_train_comb_scaled, 
+            X_target_val_scaled, y_target_val_scaled, 
+            X_target_test_scaled, y_target_test_scaled, 
             batch_size=16
         )
             
@@ -150,4 +151,4 @@ for config in c.param_grid_ResNet:
             val_rmse_scaled, val_mae_scaled, val_rmse_raw, val_mae_raw, 
             test_rmse_scaled, test_mae_scaled, test_rmse_raw, test_mae_raw
         ]
-        results_df.to_csv('results_normal/ResNet_pooled_transformed2.csv', index=False)
+        results_df.to_csv('results_volume/ResNet_targetonly.csv', index=False)
