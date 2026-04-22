@@ -198,9 +198,9 @@ def process_datasets_for_finetuning(X_target_train, y_target_train,
     test_ds  = TensorDataset(X_test, y_test)
 
     # --- Create DataLoaders ---
-    train_dl = DataLoader(train_ds, batch_size=batch_size, shuffle=True)
-    val_dl   = DataLoader(val_ds, batch_size=batch_size, shuffle=False)
-    test_dl  = DataLoader(test_ds, batch_size=batch_size, shuffle=False)
+    train_dl = DataLoader(train_ds, batch_size=batch_size, shuffle=True, drop_last=True)
+    val_dl   = DataLoader(val_ds, batch_size=batch_size, shuffle=False, drop_last=True)
+    test_dl  = DataLoader(test_ds, batch_size=batch_size, shuffle=False, drop_last=True)
 
     return train_dl, val_dl, test_dl
 
