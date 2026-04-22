@@ -68,11 +68,6 @@ def calculate_raw_metrics(model, dataloader, target_scaler):
     mae_raw = mean_absolute_error(targets_raw, preds_raw)
     return rmse_raw, mae_raw
 
-<<<<<<< HEAD
-df_exp = pd.DataFrame(columns=['seed', 'learning_rate', 'dropout', 'd_main', 'num_blocks', 'val_rmse', 'val_mae', 'rmse', 'mae'])
-
-# data (as pandas dataframes) 
-=======
 log_columns = [
     'seed', 'learning_rate', 'dropout', 'd_main', 'num_blocks', 
     'val_rmse_scaled', 'val_mae_scaled', 'val_rmse_raw', 'val_mae_raw', 
@@ -80,7 +75,6 @@ log_columns = [
 ]
 results_df = pd.DataFrame(columns=log_columns)
 # #split according to latitude
->>>>>>> f2bfcdcd934481386698ed5a840ea1bdc10fbf77
 # data_target = pd.read_csv('../datasets/rs_lettland.csv')[0:300]
 # data_source = pd.read_csv('../datasets/rs_sweden.csv')[0:2000]
 
@@ -164,16 +158,9 @@ for config in c.param_grid_ResNet:
         test_rmse_raw, test_mae_raw = calculate_raw_metrics(resnet_finetuned, test_dataloader, target_scaler_tgt)
         val_rmse_raw, val_mae_raw = calculate_raw_metrics(resnet_finetuned, val_dataloader, target_scaler_tgt)
         
-<<<<<<< HEAD
-        df_exp.loc[len(df_exp)] = [seed, learning_rate, dropout, d_main, num_blocks, val_rmse, val_mae, rmse, mae]
-        df_exp.to_csv(f'results_location/ResNet_finetuned2.csv', index=False)
-
-
-=======
         results_df.loc[len(results_df)] = [
             seed, learning_rate, dropout, d_main, num_blocks, 
             val_rmse_scaled, val_mae_scaled, val_rmse_raw, val_mae_raw, 
             test_rmse_scaled, test_mae_scaled, test_rmse_raw, test_mae_raw
         ]
         results_df.to_csv('results_normal/ResNet_finetuned_transformed2.csv', index=False)
->>>>>>> f2bfcdcd934481386698ed5a840ea1bdc10fbf77
