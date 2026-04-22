@@ -1,15 +1,18 @@
 import sys
 sys.path.append('../')
 
-from baselines import *
 import pandas as pd
-from sklearn.model_selection import train_test_split
 import numpy as np
 import torch
 import torch.nn as nn
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import root_mean_squared_error, mean_absolute_error
+from ucimlrepo import fetch_ucirepo
+
+from baselines import *
 from utils import *
 import uci_config as c
-from ucimlrepo import fetch_ucirepo 
 
 # NOTE: Architecture based on "Revisiting Deep Learning Models for Tabular Data" (Gorishniy et al., 2021).
 class ResNetBlock(nn.Module):
@@ -48,86 +51,111 @@ class TabularResNet(nn.Module):
             x = block(x)
         return self.head(x)
 
-id_list = [9, 291]
+def calculate_raw_metrics(model, dataloader, target_scaler):
+    model.eval()
+    preds_scaled, targets_scaled = [], []
+    with torch.no_grad():
+        for x_batch, y_batch in dataloader:
+            preds_scaled.append(model(x_batch).detach().cpu().numpy())
+            targets_scaled.append(y_batch.detach().cpu().numpy())
+            
+    preds_scaled = np.concatenate(preds_scaled).reshape(-1, 1)
+    targets_scaled = np.concatenate(targets_scaled).reshape(-1, 1)
+    
+    preds_raw = target_scaler.inverse_transform(preds_scaled)
+    targets_raw = target_scaler.inverse_transform(targets_scaled)
+    
+    rmse_raw = root_mean_squared_error(targets_raw, preds_raw)
+    mae_raw = mean_absolute_error(targets_raw, preds_raw)
+    return rmse_raw, mae_raw
 
-for dataset_id in id_list:
-    df_exp = pd.DataFrame(columns=['seed', 'learning_rate', 'dropout', 'd_main', 'num_blocks', 'val_rmse', 'val_mae', 'rmse', 'mae'])
+uci_dataset_ids = [925, 165, 477, 162, 9, 291]
+
+for dataset_id in uci_dataset_ids:
+    log_columns = [
+        'seed', 'learning_rate', 'dropout', 'd_main', 'num_blocks', 
+        'val_rmse_scaled', 'val_mae_scaled', 'val_rmse_raw', 'val_mae_raw', 
+        'test_rmse_scaled', 'test_mae_scaled', 'test_rmse_raw', 'test_mae_raw'
+    ]
+    results_df = pd.DataFrame(columns=log_columns)
+
+    data = fetch_ucirepo(id=dataset_id)  
+    X = data.data.features.reset_index(drop=True)
+    y = data.data.targets.reset_index(drop=True).iloc[:, 0]
+    
+    data_full = X.copy()
+    data_full['target'] = y 
+    data_full = data_full.dropna() 
+    
+    for col in data_full.select_dtypes(include='object').columns:
+        data_full[col] = data_full[col].astype('category')
+    for col in data_full.select_dtypes(include='category').columns:
+        data_full[col] = data_full[col].cat.codes
+
+    predictor_columns = list(X.columns)
+
+    corr_coefs = [X[col].corr(y) if np.issubdtype(X[col].dtype, np.number) else 0 for col in X.columns]
+    idx_closest_to_threshold = min(range(len(corr_coefs)), key=lambda i: abs(abs(corr_coefs[i]) - 0.4))
+    split_variable = X.columns[idx_closest_to_threshold]
+
+    data_full = data_full.sort_values(by=split_variable).drop(columns=split_variable)
+    predictor_columns.remove(split_variable)
+
+    split_size = len(data_full) // 4
+    data_splits = [data_full.iloc[i * split_size : (i + 1) * split_size] for i in range(4)]
+    data_splits[-1] = data_full.iloc[3 * split_size :] 
+
+    np.random.seed(dataset_id)
+    target_split_idx = np.random.choice([0, 3])
+    data_target = data_splits[target_split_idx]
+    data_source = pd.concat([data_splits[i] for i in range(4) if i != target_split_idx], ignore_index=True)
 
     for seed in c.seed_list:
-        data = fetch_ucirepo(id=dataset_id)  
-        X = data.data.features.reset_index(drop=True)
-        y = data.data.targets.reset_index(drop=True)
-        y = y[y.columns[0]] 
-        
-        data_full = X.copy()
-        data_full['target'] = y 
-        data_full = data_full.dropna() 
-        
-        for col in data_full.select_dtypes(include='object').columns:
-            data_full[col] = data_full[col].astype('category')
-        for col in data_full.select_dtypes(include='category').columns:
-            data_full[col] = data_full[col].cat.codes
-
-        target_column = 'target'
-        predictor_columns = list(X.columns)
-
-        corr_coefs = []
-        for feature in X.columns:
-            feature_data = X[feature]
-            if np.issubdtype(feature_data.dtype, np.number):
-                corr_coefs.append(feature_data.corr(y))
-            else:
-                corr_coefs.append(0)
-
-        threshold = 0.4
-        idx = min(range(len(corr_coefs)), key=lambda i: abs(abs(corr_coefs[i]) - threshold)) 
-        selected_variable = X.columns[idx]
-
-        data_full = data_full.sort_values(by=selected_variable)
-        data_full = data_full.drop(columns=selected_variable)
-        predictor_columns.remove(selected_variable)
-
-        n = len(data_full)
-        t = n // 4 
-        df_splits = [data_full.iloc[:t], data_full.iloc[t:2*t], data_full.iloc[2*t:3*t], data_full.iloc[3*t:]]
-
-        np.random.seed(dataset_id)
-        random_index = np.random.choice([0, 3])
-        data_target = df_splits[random_index]
-        data_source = pd.concat([df_splits[i] for i in range(4) if i != random_index], ignore_index=True)
-
         data_temp, data_test = train_test_split(data_target, test_size=0.2, random_state=seed)
         data_train, data_val = train_test_split(data_temp, test_size=0.25, random_state=3)
 
-        X_source_train = np.array(data_source[predictor_columns])
-        y_source_train = np.array(data_source[target_column])
-        X_target_train = np.array(data_train[predictor_columns])
-        y_target_train = np.array(data_train[target_column])
-        X_target_val = np.array(data_val[predictor_columns])
-        y_target_val = np.array(data_val[target_column])
-        X_target_test = np.array(data_test[predictor_columns])
-        y_target_test = np.array(data_test[target_column])
+        X_source_train = data_source[predictor_columns].to_numpy()
+        y_source_train = data_source['target'].to_numpy()
+        
+        X_target_train = data_train[predictor_columns].to_numpy()
+        y_target_train = data_train['target'].to_numpy()
+        
+        X_target_val = data_val[predictor_columns].to_numpy()
+        y_target_val = data_val['target'].to_numpy()
+        
+        X_target_test = data_test[predictor_columns].to_numpy()
+        y_target_test = data_test['target'].to_numpy()
 
+        X_train_comb_raw = np.vstack((X_target_train, X_source_train))
+        y_train_comb_raw = np.concatenate((y_target_train, y_source_train)).reshape(-1, 1)
+
+        feature_scaler = StandardScaler()
+        X_train_comb_scaled = feature_scaler.fit_transform(X_train_comb_raw)
+        X_target_val_scaled = feature_scaler.transform(X_target_val)
+        X_target_test_scaled = feature_scaler.transform(X_target_test)
+
+        target_scaler = StandardScaler()
+        y_train_comb_scaled = target_scaler.fit_transform(y_train_comb_raw).flatten()
+        y_target_val_scaled = target_scaler.transform(y_target_val.reshape(-1, 1)).flatten()
+        y_target_test_scaled = target_scaler.transform(y_target_test.reshape(-1, 1)).flatten()
+
+        target_train_indicator = np.ones((X_target_train.shape[0], 1))
         source_indicator = np.zeros((X_source_train.shape[0], 1))
-        X_source_train = np.hstack((X_source_train, source_indicator))
+        train_comb_indicator = np.vstack((target_train_indicator, source_indicator))
+        
+        X_train_comb_final = np.hstack((X_train_comb_scaled, train_comb_indicator))
+        
+        val_indicator = np.ones((X_target_val_scaled.shape[0], 1))
+        X_target_val_final = np.hstack((X_target_val_scaled, val_indicator))
 
-        target_indicator = np.ones((X_target_train.shape[0], 1))
-        X_target_train = np.hstack((X_target_train, target_indicator))
-
-        X_target_comb = np.vstack((X_target_train, X_source_train))
-        y_target_comb = np.concatenate((y_target_train, y_source_train))
-
-        val_indicator = np.ones((X_target_val.shape[0], 1))
-        X_target_val = np.hstack((X_target_val, val_indicator))
-
-        test_indicator = np.ones((X_target_test.shape[0], 1))
-        X_target_test = np.hstack((X_target_test, test_indicator))
+        test_indicator = np.ones((X_target_test_scaled.shape[0], 1))
+        X_target_test_final = np.hstack((X_target_test_scaled, test_indicator))
 
         for config in c.param_grid_ResNet:
             learning_rate, dropout, d_main, num_blocks = config
             
             resnet = TabularResNet(
-                input_size=X_target_test.shape[1], 
+                input_size=X_train_comb_final.shape[1], 
                 d_main=d_main, 
                 d_hidden=d_main * 2, 
                 num_blocks=num_blocks, 
@@ -136,13 +164,20 @@ for dataset_id in id_list:
         
             # TODO: Ensure batch_size > 16 if using BatchNorm on very small datasets to avoid unstable statistics
             train_dataloader, val_dataloader, test_dataloader = process_datasets_for_finetuning(
-                X_target_comb, y_target_comb, X_target_val, y_target_val, X_target_test, y_target_test, batch_size=16
+                X_train_comb_final, y_train_comb_scaled, X_target_val_final, y_target_val_scaled, X_target_test_final, y_target_test_scaled, batch_size=16
             )
             
             resnet, train_loss, val_loss = finetune_mlp_on_target(train_dataloader, val_dataloader, resnet, epochs=1000, learning_rate=learning_rate)
             
-            rmse, mae = test_final_mlp(dataloader_test=test_dataloader, mlp=resnet)
-            val_rmse, val_mae = test_final_mlp(dataloader_test=val_dataloader, mlp=resnet)
+            test_rmse_scaled, test_mae_scaled = test_final_mlp(dataloader_test=test_dataloader, mlp=resnet)
+            val_rmse_scaled, val_mae_scaled = test_final_mlp(dataloader_test=val_dataloader, mlp=resnet)
             
-            df_exp.loc[len(df_exp)] = [seed, learning_rate, dropout, d_main, num_blocks, val_rmse, val_mae, rmse, mae]
-            df_exp.to_csv(f'results/ResNet_pooled2_{dataset_id}.csv', index=False)
+            test_rmse_raw, test_mae_raw = calculate_raw_metrics(resnet, test_dataloader, target_scaler)
+            val_rmse_raw, val_mae_raw = calculate_raw_metrics(resnet, val_dataloader, target_scaler)
+            
+            results_df.loc[len(results_df)] = [
+                seed, learning_rate, dropout, d_main, num_blocks, 
+                val_rmse_scaled, val_mae_scaled, val_rmse_raw, val_mae_raw, 
+                test_rmse_scaled, test_mae_scaled, test_rmse_raw, test_mae_raw
+            ]
+            results_df.to_csv(f'results/ResNet_pooled3_{dataset_id}.csv', index=False)

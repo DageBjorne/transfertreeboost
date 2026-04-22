@@ -1,32 +1,26 @@
 import sys
 sys.path.append('../')
-
-from baselines import *
+import copy
 import pandas as pd
-from sklearn.model_selection import train_test_split
 import numpy as np
 import torch
 import torch.nn as nn
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import root_mean_squared_error, mean_absolute_error
+from ucimlrepo import fetch_ucirepo
+from baselines import *
 from utils import *
 import uci_config as c
-from ucimlrepo import fetch_ucirepo 
-import copy
 
-# NOTE: Architecture based on "Revisiting Deep Learning Models for Tabular Data" (Gorishniy et al., 2021).
 class ResNetBlock(nn.Module):
     def __init__(self, d_main, d_hidden, dropout_rate):
         super().__init__()
         self.seq = nn.Sequential(
-            nn.BatchNorm1d(d_main),
-            nn.ReLU(),
-            nn.Dropout(dropout_rate),
-            nn.Linear(d_main, d_hidden),
-            nn.BatchNorm1d(d_hidden),
-            nn.ReLU(),
-            nn.Dropout(dropout_rate),
-            nn.Linear(d_hidden, d_main)
+            nn.BatchNorm1d(d_main), nn.ReLU(), nn.Dropout(dropout_rate),
+            nn.Linear(d_main, d_hidden), nn.BatchNorm1d(d_hidden), nn.ReLU(),
+            nn.Dropout(dropout_rate), nn.Linear(d_hidden, d_main)
         )
-
     def forward(self, x):
         return x + self.seq(x)
 
@@ -34,118 +28,127 @@ class TabularResNet(nn.Module):
     def __init__(self, input_size, d_main, d_hidden, num_blocks, dropout_rate, output_size=1):
         super().__init__()
         self.first_layer = nn.Linear(input_size, d_main)
-        self.blocks = nn.ModuleList([
-            ResNetBlock(d_main, d_hidden, dropout_rate) for _ in range(num_blocks)
-        ])
-        self.head = nn.Sequential(
-            nn.BatchNorm1d(d_main),
-            nn.ReLU(),
-            nn.Linear(d_main, output_size)
-        )
-
+        self.blocks = nn.ModuleList([ResNetBlock(d_main, d_hidden, dropout_rate) for _ in range(num_blocks)])
+        self.head = nn.Sequential(nn.BatchNorm1d(d_main), nn.ReLU(), nn.Linear(d_main, output_size))
     def forward(self, x):
         x = self.first_layer(x)
-        for block in self.blocks:
-            x = block(x)
+        for block in self.blocks: x = block(x)
         return self.head(x)
 
-id_list = [925, 165, 477, 162] #InfraRed = 925, concrete = 165, Auto MPG = 9, 
-        #Real estate valuation = 477, Air-foil self-noise = 291, forest fires = 162
+def calculate_raw_metrics(model, dataloader, target_scaler):
+    model.eval()
+    preds_scaled, targets_scaled = [], []
+    with torch.no_grad():
+        for x_batch, y_batch in dataloader:
+            preds_scaled.append(model(x_batch).detach().cpu().numpy())
+            targets_scaled.append(y_batch.detach().cpu().numpy())
+            
+    preds_scaled = np.concatenate(preds_scaled).reshape(-1, 1)
+    targets_scaled = np.concatenate(targets_scaled).reshape(-1, 1)
+    
+    preds_raw = target_scaler.inverse_transform(preds_scaled)
+    targets_raw = target_scaler.inverse_transform(targets_scaled)
+    
+    rmse_raw = root_mean_squared_error(targets_raw, preds_raw)
+    mae_raw = mean_absolute_error(targets_raw, preds_raw)
+    return rmse_raw, mae_raw
 
-for dataset_id in id_list:
-    df_exp = pd.DataFrame(columns=['seed', 'learning_rate', 'dropout', 'd_main', 'num_blocks', 'val_rmse', 'val_mae', 'rmse', 'mae'])
+uci_dataset_ids = [925, 165, 9, 477, 291, 162]
 
-    data = fetch_ucirepo(id=dataset_id)  
+for dataset_id in uci_dataset_ids:
+    # NOTE: DataFrame expanded to capture both scaled and raw validation/test metrics
+    log_columns = [
+        'seed', 'learning_rate', 'dropout', 'd_main', 'num_blocks', 
+        'val_rmse_scaled', 'val_mae_scaled', 'val_rmse_raw', 'val_mae_raw', 
+        'test_rmse_scaled', 'test_mae_scaled', 'test_rmse_raw', 'test_mae_raw'
+    ]
+    results_df = pd.DataFrame(columns=log_columns)
+    
+    data = fetch_ucirepo(id=dataset_id)
     X = data.data.features.reset_index(drop=True)
-    y = data.data.targets.reset_index(drop=True)
-    y = y[y.columns[0]] 
+    y = data.data.targets.reset_index(drop=True).iloc[:, 0]
     
     data_full = X.copy()
-    data_full['target'] = y 
-    data_full = data_full.dropna() 
+    data_full['target'] = y
+    data_full = data_full.dropna()
     
     for col in data_full.select_dtypes(include='object').columns:
         data_full[col] = data_full[col].astype('category')
     for col in data_full.select_dtypes(include='category').columns:
         data_full[col] = data_full[col].cat.codes
 
-    target_column = 'target'
     predictor_columns = list(X.columns)
+    corr_coefs = [X[col].corr(y) if np.issubdtype(X[col].dtype, np.number) else 0 for col in X.columns]
+    idx_closest_to_threshold = min(range(len(corr_coefs)), key=lambda i: abs(abs(corr_coefs[i]) - 0.4))
+    split_variable = X.columns[idx_closest_to_threshold]
 
-    corr_coefs = []
-    for feature in X.columns:
-        feature_data = X[feature]
-        if np.issubdtype(feature_data.dtype, np.number):
-            corr_coefs.append(feature_data.corr(y))
-        else:
-            corr_coefs.append(0)
+    data_full = data_full.sort_values(by=split_variable).drop(columns=split_variable)
+    predictor_columns.remove(split_variable)
 
-    threshold = 0.4
-    idx = min(range(len(corr_coefs)), key=lambda i: abs(abs(corr_coefs[i]) - threshold)) 
-    selected_variable = X.columns[idx]
-
-    data_full = data_full.sort_values(by=selected_variable)
-    data_full = data_full.drop(columns=selected_variable)
-    predictor_columns.remove(selected_variable)
-
-    n = len(data_full)
-    t = n // 4 
-    df_splits = [data_full.iloc[:t], data_full.iloc[t:2*t], data_full.iloc[2*t:3*t], data_full.iloc[3*t:]]
+    split_size = len(data_full) // 4
+    data_splits = [data_full.iloc[i * split_size : (i + 1) * split_size] for i in range(4)]
+    data_splits[-1] = data_full.iloc[3 * split_size :] 
 
     np.random.seed(dataset_id)
-    random_index = np.random.choice([0, 3])
-    data_target = df_splits[random_index]
-    data_source = pd.concat([df_splits[i] for i in range(4) if i != random_index], ignore_index=True)
+    target_split_idx = np.random.choice([0, 3])
+    data_target = data_splits[target_split_idx]
+    data_source = pd.concat([data_splits[i] for i in range(4) if i != target_split_idx], ignore_index=True)
 
-    X_source_train = np.array(data_source[predictor_columns])
-    y_source_train = np.array(data_source[target_column]) 
+    X_source_train = data_source[predictor_columns].to_numpy()
+    y_source_train = data_source['target'].to_numpy().reshape(-1, 1)
+
+    feature_scaler_source = StandardScaler()
+    target_scaler_source = StandardScaler()
+    X_source_train_scaled = feature_scaler_source.fit_transform(X_source_train)
+    y_source_train_scaled = target_scaler_source.fit_transform(y_source_train).flatten()
 
     for config in c.param_grid_ResNet:
         learning_rate, dropout, d_main, num_blocks = config
-        
         resnet_base = TabularResNet(
-            input_size=X_source_train.shape[1], 
-            d_main=d_main, 
-            d_hidden=d_main * 2, 
-            num_blocks=num_blocks, 
-            dropout_rate=dropout
+            input_size=X_source_train_scaled.shape[1], d_main=d_main, 
+            d_hidden=d_main * 2, num_blocks=num_blocks, dropout_rate=dropout
         )
         
-        dataloader_train_source = process_dataset_for_base_network(X_source_train, y_source_train, batch_size=16)
-        
-        resnet_base, train_loss_src, val_loss_src = train_mlp_on_source(dataloader_train_source, resnet_base, learning_rate=learning_rate, epochs=1000)
-        
-        # NOTE: Deepcopy used to ensure the base state remains pristine across seed iterations
+        dataloader_train_source = process_dataset_for_base_network(X_source_train_scaled, y_source_train_scaled, batch_size=16)
+        resnet_base, _, _ = train_mlp_on_source(dataloader_train_source, resnet_base, learning_rate=learning_rate, epochs=1000)
         base_state_dict = copy.deepcopy(resnet_base.state_dict())
 
         for seed in c.seed_list:
             resnet_finetuned = TabularResNet(
-                input_size=X_source_train.shape[1], 
-                d_main=d_main, 
-                d_hidden=d_main * 2, 
-                num_blocks=num_blocks, 
-                dropout_rate=dropout
+                input_size=X_source_train_scaled.shape[1], d_main=d_main, 
+                d_hidden=d_main * 2, num_blocks=num_blocks, dropout_rate=dropout
             )
             resnet_finetuned.load_state_dict(base_state_dict)
 
             data_temp, data_test = train_test_split(data_target, test_size=0.2, random_state=seed)
             data_train, data_val = train_test_split(data_temp, test_size=0.25, random_state=3)
 
-            X_target_train = np.array(data_train[predictor_columns])
-            y_target_train = np.array(data_train[target_column])
-            X_target_val = np.array(data_val[predictor_columns])
-            y_target_val = np.array(data_val[target_column])
-            X_target_test = np.array(data_test[predictor_columns])
-            y_target_test = np.array(data_test[target_column])
+            feature_scaler_target = StandardScaler()
+            X_target_train_scaled = feature_scaler_target.fit_transform(data_train[predictor_columns].to_numpy())
+            X_target_val_scaled = feature_scaler_target.transform(data_val[predictor_columns].to_numpy())
+            X_target_test_scaled = feature_scaler_target.transform(data_test[predictor_columns].to_numpy())
+            
+            target_scaler_target = StandardScaler()
+            y_target_train_scaled = target_scaler_target.fit_transform(data_train['target'].to_numpy().reshape(-1, 1)).flatten()
+            y_target_val_scaled = target_scaler_target.transform(data_val['target'].to_numpy().reshape(-1, 1)).flatten()
+            y_target_test_scaled = target_scaler_target.transform(data_test['target'].to_numpy().reshape(-1, 1)).flatten()
             
             train_dataloader, val_dataloader, test_dataloader = process_datasets_for_finetuning(
-                X_target_train, y_target_train, X_target_val, y_target_val, X_target_test, y_target_test, batch_size=16
+                X_target_train_scaled, y_target_train_scaled, X_target_val_scaled, y_target_val_scaled, 
+                X_target_test_scaled, y_target_test_scaled, batch_size=16
             )
             
-            resnet_finetuned, train_loss_tgt, val_loss_tgt = finetune_mlp_on_target(train_dataloader, val_dataloader, resnet_finetuned, epochs=1000, learning_rate=learning_rate)
+            resnet_finetuned, _, _ = finetune_mlp_on_target(train_dataloader, val_dataloader, resnet_finetuned, epochs=1000, learning_rate=learning_rate)
             
-            rmse, mae = test_final_mlp(dataloader_test=test_dataloader, mlp=resnet_finetuned)
-            val_rmse, val_mae = test_final_mlp(dataloader_test=val_dataloader, mlp=resnet_finetuned)
+            test_rmse_scaled, test_mae_scaled = test_final_mlp(dataloader_test=test_dataloader, mlp=resnet_finetuned)
+            val_rmse_scaled, val_mae_scaled = test_final_mlp(dataloader_test=val_dataloader, mlp=resnet_finetuned)
             
-            df_exp.loc[len(df_exp)] = [seed, learning_rate, dropout, d_main, num_blocks, val_rmse, val_mae, rmse, mae]
-            df_exp.to_csv(f'results/ResNet_finetuned2_{dataset_id}.csv', index=False)
+            test_rmse_raw, test_mae_raw = calculate_raw_metrics(resnet_finetuned, test_dataloader, target_scaler_target)
+            val_rmse_raw, val_mae_raw = calculate_raw_metrics(resnet_finetuned, val_dataloader, target_scaler_target)
+            
+            results_df.loc[len(results_df)] = [
+                seed, learning_rate, dropout, d_main, num_blocks, 
+                val_rmse_scaled, val_mae_scaled, val_rmse_raw, val_mae_raw, 
+                test_rmse_scaled, test_mae_scaled, test_rmse_raw, test_mae_raw
+            ]
+            results_df.to_csv(f'results/ResNet_finetuned3_{dataset_id}.csv', index=False)
