@@ -14,7 +14,6 @@ from utils import *
 import rs_config as c
 import copy
 
-# NOTE: Architecture based on "Revisiting Deep Learning Models for Tabular Data" (Gorishniy et al., 2021).
 class ResNetBlock(nn.Module):
     def __init__(self, d_main, d_hidden, dropout_rate):
         super().__init__()
@@ -75,7 +74,6 @@ log_columns = [
     'test_rmse_scaled', 'test_mae_scaled', 'test_rmse_raw', 'test_mae_raw'
 ]
 results_df = pd.DataFrame(columns=log_columns)
-
 # #split according to latitude
 # data_target = pd.read_csv('../datasets/rs_lettland.csv')[0:300]
 # data_source = pd.read_csv('../datasets/rs_sweden.csv')
@@ -89,11 +87,11 @@ X_source_train_raw = data_source[c.predictor_columns].to_numpy()
 y_source_train_raw = data_source[c.target_column].to_numpy() # change to Volume
 
 # Standardize based on the source domain exclusively to preserve feature space alignment during transfer
-feature_scaler = StandardScaler()
-X_source_train_scaled = feature_scaler.fit_transform(X_source_train_raw)
+feature_scaler_src = StandardScaler()
+X_source_train_scaled = feature_scaler_src.fit_transform(X_source_train_raw)
 
-target_scaler = StandardScaler()
-y_source_train_scaled = target_scaler.fit_transform(y_source_train_raw.reshape(-1, 1)).flatten()
+target_scaler_src = StandardScaler()
+y_source_train_scaled = target_scaler_src.fit_transform(y_source_train_raw.reshape(-1, 1)).flatten()
 
 for config in c.param_grid_ResNet:
     learning_rate, dropout, d_main, num_blocks = config
@@ -131,16 +129,16 @@ for config in c.param_grid_ResNet:
         X_target_test_raw = data_test[c.predictor_columns].to_numpy()
         y_target_test_raw = data_test[c.target_column].to_numpy()
 
-        # Transform target data using the source scalers
-        X_target_train_scaled = feature_scaler.transform(X_target_train_raw)
-        X_target_val_scaled = feature_scaler.transform(X_target_val_raw)
-        X_target_test_scaled = feature_scaler.transform(X_target_test_raw)
+        feature_scaler_tgt = StandardScaler()
+        X_target_train_scaled = feature_scaler_tgt.fit_transform(X_target_train_raw)
+        X_target_val_scaled = feature_scaler_tgt.transform(X_target_val_raw)
+        X_target_test_scaled = feature_scaler_tgt.transform(X_target_test_raw)
 
-        y_target_train_scaled = target_scaler.transform(y_target_train_raw.reshape(-1, 1)).flatten()
-        y_target_val_scaled = target_scaler.transform(y_target_val_raw.reshape(-1, 1)).flatten()
-        y_target_test_scaled = target_scaler.transform(y_target_test_raw.reshape(-1, 1)).flatten()
+        target_scaler_tgt = StandardScaler()
+        y_target_train_scaled = target_scaler_tgt.fit_transform(y_target_train_raw.reshape(-1, 1)).flatten()
+        y_target_val_scaled = target_scaler_tgt.transform(y_target_val_raw.reshape(-1, 1)).flatten()
+        y_target_test_scaled = target_scaler_tgt.transform(y_target_test_raw.reshape(-1, 1)).flatten()
         
-        # TODO: Ensure batch_size > 16 if using BatchNorm on very small datasets
         train_dataloader, val_dataloader, test_dataloader = process_datasets_for_finetuning(
             X_target_train_scaled, y_target_train_scaled, 
             X_target_val_scaled, y_target_val_scaled, 
@@ -153,8 +151,8 @@ for config in c.param_grid_ResNet:
         test_rmse_scaled, test_mae_scaled = test_final_mlp(dataloader_test=test_dataloader, mlp=resnet_finetuned)
         val_rmse_scaled, val_mae_scaled = test_final_mlp(dataloader_test=val_dataloader, mlp=resnet_finetuned)
 
-        test_rmse_raw, test_mae_raw = calculate_raw_metrics(resnet_finetuned, test_dataloader, target_scaler)
-        val_rmse_raw, val_mae_raw = calculate_raw_metrics(resnet_finetuned, val_dataloader, target_scaler)
+        test_rmse_raw, test_mae_raw = calculate_raw_metrics(resnet_finetuned, test_dataloader, target_scaler_tgt)
+        val_rmse_raw, val_mae_raw = calculate_raw_metrics(resnet_finetuned, val_dataloader, target_scaler_tgt)
         
         results_df.loc[len(results_df)] = [
             seed, learning_rate, dropout, d_main, num_blocks, 
