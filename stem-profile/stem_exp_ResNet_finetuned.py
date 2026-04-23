@@ -77,16 +77,16 @@ results_df = pd.DataFrame(columns=log_columns)
 
 # data (as pandas dataframes) 
 data = pd.read_csv('../datasets/stem_data.csv')
-# data_target = data[data['Species'] == 'Spruce']
-# data_source = data[data['Species'] == 'Pine']
+data_target = data[data['Species'] == 'Spruce']
+data_source = data[data['Species'] == 'Pine']
 
 # #split according to latitude
-q3 = np.percentile(data.copy()['Lat'], 25)
-data_source = data[data['Lat'] >= q3]
-data_target = data[data['Lat'] < q3]
+# q3 = np.percentile(data.copy()['Lat'], 25)
+# data_source = data[data['Lat'] >= q3]
+# data_target = data[data['Lat'] < q3]
 
 X_source_train_raw = data_source[c.predictor_columns].to_numpy()
-y_source_train_raw = data_source[c.target_column].to_numpy() # change to Height
+y_source_train_raw = data_source["Height"].to_numpy() # change to Height
 
 # Standardize based on the source domain exclusively to preserve feature space alignment during transfer
 feature_scaler_src = StandardScaler()
@@ -145,7 +145,7 @@ for config in c.param_grid_ResNet:
             X_target_train_scaled, y_target_train_scaled, 
             X_target_val_scaled, y_target_val_scaled, 
             X_target_test_scaled, y_target_test_scaled, 
-            batch_size=8
+            batch_size=16
         )
         
         resnet_finetuned, train_loss_tgt, val_loss_tgt = finetune_mlp_on_target(train_dataloader, val_dataloader, resnet_finetuned, epochs=1000, learning_rate=learning_rate)
@@ -161,4 +161,4 @@ for config in c.param_grid_ResNet:
             val_rmse_scaled, val_mae_scaled, val_rmse_raw, val_mae_raw, 
             test_rmse_scaled, test_mae_scaled, test_rmse_raw, test_mae_raw
         ]
-        results_df.to_csv('results_location/ResNet_finetuned_transformed2.csv', index=False)
+        results_df.to_csv('results_height/ResNet_finetuned_transformed2_EXTEND.csv', index=False)
