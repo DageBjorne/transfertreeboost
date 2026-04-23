@@ -69,7 +69,7 @@ def calculate_raw_metrics(model, dataloader, target_scaler):
     mae_raw = mean_absolute_error(targets_raw, preds_raw)
     return rmse_raw, mae_raw
 
-uci_dataset_ids = [925, 165, 477] #162, 9, 291,
+uci_dataset_ids = [925, 165, 477, 162, 9, 291]
 
 for dataset_id in uci_dataset_ids:
     log_columns = [
@@ -187,4 +187,4 @@ for dataset_id in uci_dataset_ids:
                 val_rmse_scaled, val_mae_scaled, val_rmse_raw, val_mae_raw, 
                 test_rmse_scaled, test_mae_scaled, test_rmse_raw, test_mae_raw
             ]
-            results_df.to_csv(f'results/ResNet_TARGETONLY_{dataset_id}.csv', index=False)
+            results_df.to_csv(f'results/ResNet_TARGETONLY_{dataset_id}_extend.csv', index=False)

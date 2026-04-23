@@ -49,10 +49,15 @@ dropout_list = [0.0, 0.1, 0.2]
 param_grid_MLP= list(itertools.product(learning_rate_list, 
                                              dropout_list))
 
+#learning_rate_list = [1e-3, 5e-4, 1e-4]# , 5e-5, 1e-5] #5
+#dropout_list = [0.0, 0.1] #[0.0, 0.1, 0.2] #15
+#d_main_list = [64, 256]#, 128]  #45
+#num_blocks_list = [2, 4]#, 3] #135
+
 learning_rate_list = [1e-3, 5e-4, 1e-4]# , 5e-5, 1e-5] #5
-dropout_list = [0.0, 0.1] #[0.0, 0.1, 0.2] #15
-d_main_list = [64, 256]#, 128]  #45
-num_blocks_list = [2, 4]#, 3] #135
+dropout_list = [0.0, 0.1, 0.2] #[0.0, 0.1, 0.2] #15
+d_main_list = [64, 128, 256]#, 128]  #45
+num_blocks_list = [2, 3, 4]#, 3] #135
 
 param_grid_ResNet = list(itertools.product(learning_rate_list, 
                                            dropout_list,
