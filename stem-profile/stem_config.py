@@ -45,10 +45,20 @@ dropout_list = [0.0, 0.1] #[0.0, 0.1, 0.2] #15
 d_main_list = [64, 256]#, 128]  #45
 num_blocks_list = [2, 4]#, 3] #135
 
-param_grid_ResNet = list(itertools.product(learning_rate_list, 
-                                           dropout_list,
-                                           d_main_list,
-                                           num_blocks_list))
+old_lr = [1e-3, 5e-4, 1e-4]
+old_dropout = [0.0, 0.1]
+old_d_main = [64, 256]
+old_num_blocks = [2, 4]
+
+new_lr = [1e-3, 5e-4, 1e-4]
+new_dropout = [0.0, 0.1, 0.2]
+new_d_main = [64, 128, 256]
+new_num_blocks = [2, 3, 4]
+
+old_grid = set(itertools.product(old_lr, old_dropout, old_d_main, old_num_blocks))
+new_grid = set(itertools.product(new_lr, new_dropout, new_d_main, new_num_blocks))
+
+param_grid_ResNet = sorted(list(new_grid - old_grid))
 
 
 predictor_columns = [str(i) for i in range(3, 26)]
