@@ -153,4 +153,4 @@ for config in c.param_grid_ResNet:
             val_rmse_scaled, val_mae_scaled, val_rmse_raw, val_mae_raw, 
             test_rmse_scaled, test_mae_scaled, test_rmse_raw, test_mae_raw
         ]
-        results_df.to_csv('results_location/ResNet_targetonly.csv', index=False)
+        results_df.to_csv('results_location/ResNet_targetonly_EXTEND.csv', index=False)
