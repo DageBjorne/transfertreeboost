@@ -90,11 +90,11 @@ model = joblib.load('model.joblib') #to load saved model
 ## Run experiments
 To replicate our experiments, run the scripts in the following folders:
 
-- `friedman1_simul`: experiments for the friedman #1 dataset. All results and visualizations are saved, but all of it can be reproduced following the provided notebooks.
+- `friedman1_simul`: experiments for the friedman #1 dataset. All results and visualizations are saved, but all of it can be reproduced following the provided scripts and notebooks.
 - `uci`: experiments on UCI datasets 
 - `remote-sensing`: experiments for the remote sensing experiments. Unfortunately, access to the datasets are restricted due to confidentiality, so they cannot be shared. However, we have saved the results, so that the visualizations can be reproduced. Moreover, the training logic is provided. We decided to include this to be as transparent as we possible can.
-- `stem-profile`: experiments for the stem volume prediction task. As for the `remote-sensing` data, this dataset cannot be shared, but the results are saved in the folder, training logic, and visualization notebooks are saved.
-- `final_simulations`: experiments for the final friedman experiments
+- `stem-profile`: experiments for the stem volume prediction task. As for the `remote-sensing` data, this dataset cannot be shared, but the results are saved in the folder. Also, training logic and visualization notebooks are provided.
+- `final_simulations`: experiments for the final friedman experiments.
 
 Each folder has a similar structure, with similar names. For example, in `stem-profile`:
 - `stem_exp_transfertreeboost_LS.py`: runs our method (under least-squares loss)
