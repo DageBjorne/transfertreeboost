@@ -102,7 +102,7 @@ Each folder has a similar structure, with similar names. For example, in `stem-p
 - `stem_exp_xgboost_warmstart.py`: runs XGBoost warmstart
 - `stem_exp_xgboost_naive.py`: runs Pooled XGBoost
 - `stem_exp_trada.py`: runs TrAdaBoost.R2
-- `stem_exp_ResNet_targetonly.py`: runs target-only ResNet¨
+- `stem_exp_ResNet_targetonly.py`: runs target-only ResNet
 - `stem_exp_ResNet_finetuned.py`: runs train on source, refine on target ResNet
 
 
