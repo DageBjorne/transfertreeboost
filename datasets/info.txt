@@ -1,0 +1,1 @@
+This folder is empty because the datasets cannot be shared freely. Contact dag.bjornberg@lnu.se if you are interested in obtaining the datasets. The Friedman #1 dataset can be generated using the friedman1.py script in the root folder.
