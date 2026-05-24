@@ -22,7 +22,7 @@ Simple examples follow, with default parameters (same default parameters for LAD
 from core import LSTransferTreeBoost # or LADTransferTreeBoost, MTransferTreeBoost
 #instantiate model
 model = LSTransferTreeBoost(v=0.1, epochs=100, target_tree_size=2,
-                            source_tree_size=2, k=0.05, m_0=0.9, min_samples_leaf=25)
+                            source_tree_size=2, k=0.05, m_0=0.9, min_samples_leaf=1)
 
 ```
 ### Model parameters
