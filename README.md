@@ -1,4 +1,10 @@
+<div align="center">
+  
 # TransferTreeBoost
+by [Dag Björnberg](), [Jonas Nordqvist](), [Morgan Ericsson](), [Johan Lindeberg](), [Welf Löwe]() and [Johan E.S. Fransson]().
+
+[![Paper link](https://img.shields.io/badge/TMLR-openreview-openreview.svg)](https://openreview.net/forum?id=b29TPa8NPT)
+</div> 
 
 This repository is used for employing ```TransferTreeBoost```, a method for transfer learning based on Gradient Tree Boosting. 
 
