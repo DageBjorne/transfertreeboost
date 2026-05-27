@@ -6,7 +6,7 @@ by [Dag Björnberg](), [Jonas Nordqvist](), [Morgan Ericsson](), [Johan Lindeber
 [![Paper link](https://img.shields.io/badge/TMLR-openreview-openreview.svg)](https://openreview.net/forum?id=b29TPa8NPT)
 </div> 
 
-This repository is used for employing ```TransferTreeBoost```, a method for transfer learning based on Gradient Tree Boosting. 
+This is the repository for ```TransferTreeBoost```, a method for transfer learning based on Gradient Tree Boosting. 
 
 Currently, three methods are available:
 - ```LSTransferTreeBoost:``` For least-squares loss, 
