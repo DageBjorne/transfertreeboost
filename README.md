@@ -115,15 +115,10 @@ Each folder has a similar structure, with similar names. For example, in `stem-p
 If you find our work useful, please cite it
 ```
 bibtex
-@article{
-bj{\"o}rnberg2026gradient,
-title={Gradient Tree Boosting for Regression Transfer},
-author={Dag Bj{\"o}rnberg and Jonas Nordqvist and Morgan Ericsson and Johan Lindeberg and Welf L{\"o}we and Johan E.S. Fransson},
-journal={Transactions on Machine Learning Research},
-issn={2835-8856},
-year={2026},
-url={https://openreview.net/forum?id=b29TPa8NPT},
-note={}
+@article{bjornberggradient,
+  title={Gradient Tree Boosting for Regression Transfer},
+  author={Bj{\"o}rnberg, Dag and Nordqvist, Jonas and Ericsson, Morgan and Lindeberg, Johan and L{\"o}we, Welf and Fransson, Johan ES},
+  journal={Transactions on Machine Learning Research}
 }
 ```
 
